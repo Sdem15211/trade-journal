@@ -1,5 +1,9 @@
+import { SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/dashboard/app-sidebar";
+import { SidebarProvider } from "@/components/ui/sidebar";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
+import { SessionProvider } from "next-auth/react";
 
 export default async function DashboardLayout({
   children,
@@ -12,5 +16,17 @@ export default async function DashboardLayout({
     redirect("/");
   }
 
-  return <div className="mx-auto max-w-7xl">{children}</div>;
+  return (
+    <SessionProvider>
+      <SidebarProvider>
+        <AppSidebar />
+        <SidebarInset>
+          <main>
+            <SidebarTrigger />
+            {children}
+          </main>
+        </SidebarInset>
+      </SidebarProvider>
+    </SessionProvider>
+  );
 }
