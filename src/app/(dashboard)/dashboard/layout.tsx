@@ -1,4 +1,4 @@
-import { SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
+import { SidebarInset } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/dashboard/app-sidebar";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { auth } from "@/lib/auth";
@@ -21,10 +21,7 @@ export default async function DashboardLayout({
       <SidebarProvider>
         <AppSidebar />
         <SidebarInset>
-          <main>
-            <SidebarTrigger />
-            {children}
-          </main>
+          <main>{children}</main>
         </SidebarInset>
       </SidebarProvider>
     </SessionProvider>

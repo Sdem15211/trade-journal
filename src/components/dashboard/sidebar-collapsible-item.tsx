@@ -27,7 +27,7 @@ export function SidebarCollapsibleItem({
   items,
 }: SidebarCollapsibleItemProps) {
   return (
-    <Collapsible asChild>
+    <Collapsible className="group/collapsible" asChild>
       <SidebarMenuItem>
         <CollapsibleTrigger asChild>
           <SidebarMenuButton tooltip={label}>

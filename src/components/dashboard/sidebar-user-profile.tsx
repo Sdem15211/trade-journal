@@ -13,9 +13,9 @@ import {
 import { SidebarMenuItem, SidebarMenuButton } from "../ui/sidebar";
 import {
   BadgeCheck,
-  ChevronsUpDown,
   CreditCard,
   LogOut,
+  Settings2,
   Sparkles,
 } from "lucide-react";
 import { User } from "next-auth";
@@ -56,7 +56,7 @@ export function SidebarUserProfile({ user }: { user: User }) {
                 <span className="truncate text-xs">{user.email}</span>
               )}
             </div>
-            <ChevronsUpDown className="ml-auto size-4" />
+            <Settings2 className="ml-auto size-4" />
           </SidebarMenuButton>
         </DropdownMenuTrigger>
         <DropdownMenuContent
