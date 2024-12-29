@@ -1,5 +1,3 @@
-"use client";
-
 import { BookOpen, Database, Home, LineChart, Sparkles } from "lucide-react";
 import {
   Sidebar,
@@ -17,33 +15,30 @@ import {
 import { SidebarUserProfile } from "./sidebar-user-profile";
 import { SidebarCollapsibleItem } from "./sidebar-collapsible-item";
 import Link from "next/link";
-import { useSession } from "next-auth/react";
+import { auth } from "@/lib/auth";
 
 const TEMP_JOURNAL_TYPES = ["Forex", "Crypto", "Stocks"];
 
-export function AppSidebar() {
-  const { data: session } = useSession();
+export async function AppSidebar() {
+  const session = await auth();
 
   if (!session?.user) return null;
 
   return (
     <Sidebar collapsible="icon">
-      <SidebarHeader className="p-4">
-        <div className="flex items-center gap-2">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gray-900">
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              className="text-white"
-            >
-              <path d="M4 4h16v16H4V4z" stroke="currentColor" strokeWidth="2" />
-            </svg>
-          </div>
-          <span className="text-lg font-semibold">Trade</span>
-        </div>
+      <SidebarHeader>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton size="lg" asChild>
+              <Link href="/dashboard">
+                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+                  <Database className="size-4" />
+                </div>
+                <span className="font-semibold">Trade</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
       </SidebarHeader>
 
       <SidebarContent>
