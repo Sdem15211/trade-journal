@@ -1,4 +1,12 @@
-import { BookOpen, Database, Home, LineChart, Sparkles } from "lucide-react";
+import {
+  BadgeCheck,
+  BookOpen,
+  CreditCard,
+  Database,
+  Home,
+  LineChart,
+  Sparkles,
+} from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -9,13 +17,14 @@ import {
   SidebarHeader,
   SidebarMenu,
   SidebarMenuItem,
-  SidebarMenuButton,
   SidebarRail,
 } from "../ui/sidebar";
 import { SidebarUserProfile } from "./sidebar-user-profile";
 import { SidebarCollapsibleItem } from "./sidebar-collapsible-item";
-import Link from "next/link";
 import { auth } from "@/lib/auth";
+import { SidebarActiveLink } from "./sidebar-active-link";
+import Link from "next/link";
+import { SidebarMenuButton } from "../ui/sidebar";
 
 const TEMP_JOURNAL_TYPES = ["Forex", "Crypto", "Stocks"];
 
@@ -47,42 +56,58 @@ export async function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive>
-                  <Link href="/dashboard">
-                    <Home />
-                    <span>Dashboard</span>
-                  </Link>
-                </SidebarMenuButton>
+                <SidebarActiveLink href="/dashboard">
+                  <Home />
+                  <span>Dashboard</span>
+                </SidebarActiveLink>
               </SidebarMenuItem>
 
               <SidebarCollapsibleItem
                 icon={<BookOpen />}
                 label="Journals"
                 items={TEMP_JOURNAL_TYPES}
+                baseRoute="dashboard/journals"
               />
 
               <SidebarCollapsibleItem
                 icon={<Database />}
                 label="Backtesting"
                 items={TEMP_JOURNAL_TYPES}
+                baseRoute="dashboard/backtesting"
               />
 
               <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <Link href="/ai-insights">
-                    <Sparkles />
-                    <span>AI insights</span>
-                  </Link>
-                </SidebarMenuButton>
+                <SidebarActiveLink href="/dashboard/ai-insights">
+                  <Sparkles />
+                  <span>AI insights</span>
+                </SidebarActiveLink>
               </SidebarMenuItem>
 
               <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <Link href="/upgrade">
-                    <LineChart />
-                    <span>Upgrade plan</span>
-                  </Link>
-                </SidebarMenuButton>
+                <SidebarActiveLink href="/dashboard/upgrade">
+                  <LineChart />
+                  <span>Upgrade plan</span>
+                </SidebarActiveLink>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup>
+          <SidebarGroupLabel>Settings</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarActiveLink href="/account">
+                  <BadgeCheck />
+                  <span>Account</span>
+                </SidebarActiveLink>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarActiveLink href="/billing">
+                  <CreditCard />
+                  <span>Billing</span>
+                </SidebarActiveLink>
               </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
