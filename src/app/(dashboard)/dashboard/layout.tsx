@@ -3,7 +3,6 @@ import { AppSidebar } from "@/components/dashboard/app-sidebar";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { SessionProvider } from "next-auth/react";
 
 export default async function DashboardLayout({
   children,
@@ -17,13 +16,11 @@ export default async function DashboardLayout({
   }
 
   return (
-    <SessionProvider>
-      <SidebarProvider>
-        <AppSidebar />
-        <SidebarInset>
-          <main>{children}</main>
-        </SidebarInset>
-      </SidebarProvider>
-    </SessionProvider>
+    <SidebarProvider>
+      <AppSidebar />
+      <SidebarInset>
+        <main>{children}</main>
+      </SidebarInset>
+    </SidebarProvider>
   );
 }
