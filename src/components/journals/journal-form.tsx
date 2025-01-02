@@ -12,6 +12,75 @@ import { createJournal } from "@/app/actions/journal";
 import type { CreateJournalInput } from "@/app/actions/journal";
 import { useToast } from "@/hooks/use-toast";
 import { useActionState } from "react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { DatePicker } from "@/components/ui/date-picker";
+
+// Add this component for default fields display
+function DefaultFieldDisplay() {
+  return (
+    <div className="space-y-4">
+      <h3 className="text-lg font-semibold">Default Fields</h3>
+      <div className="space-y-4">
+        {/* Pair Field */}
+        <div className="space-y-2">
+          <Label>Pair</Label>
+          <Input placeholder="Fill in the pair" disabled />
+        </div>
+
+        {/* Date Fields */}
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="space-y-2">
+            <Label>Open date</Label>
+            <DatePicker disabled />
+          </div>
+          <div className="space-y-2">
+            <Label>Close date</Label>
+            <DatePicker disabled />
+          </div>
+        </div>
+
+        {/* Result and P&L Fields */}
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="space-y-2">
+            <Label>Result</Label>
+            <Select disabled>
+              <SelectTrigger>
+                <SelectValue placeholder="Select" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="WIN">Win</SelectItem>
+                <SelectItem value="LOSS">Loss</SelectItem>
+                <SelectItem value="BREAKEVEN">Break-even</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label>P&L</Label>
+            <div className="relative">
+              <Input
+                type="number"
+                step="0.01"
+                placeholder="0.00"
+                disabled
+                className="pr-6"
+              />
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                %
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export function JournalForm() {
   const router = useRouter();
@@ -29,10 +98,7 @@ export function JournalForm() {
     if (state?.error) {
       toast({
         title: "Error",
-        description:
-          typeof state.error === "string"
-            ? state.error
-            : "Failed to create journal",
+        description: state.error,
         variant: "destructive",
       });
     } else if (state?.success) {
@@ -67,7 +133,7 @@ export function JournalForm() {
   return (
     <form action={formAction}>
       <input type="hidden" name="fields" value={JSON.stringify(customFields)} />
-      <Card>
+      <Card className="w-2/3 mx-auto">
         <CardHeader>
           <CardTitle>Journal Details</CardTitle>
           {state?.error && (
@@ -78,20 +144,22 @@ export function JournalForm() {
             </div>
           )}
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-8">
           <div className="space-y-2">
             <Label htmlFor="name">Journal Name</Label>
             <Input id="name" name="name" disabled={isPending} />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description">Description (optional)</Label>
             <Textarea
               id="description"
               name="description"
               disabled={isPending}
             />
           </div>
+
+          <DefaultFieldDisplay />
 
           <div className="space-y-4">
             <div className="flex items-center justify-between">
@@ -119,6 +187,13 @@ export function JournalForm() {
                 disabled={isPending}
               />
             ))}
+          </div>
+
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <Label>Notes (optional)</Label>
+            </div>
+            <Textarea disabled placeholder="notes" className="resize-none" />
           </div>
 
           <div className="flex justify-end gap-4">

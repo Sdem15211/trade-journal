@@ -12,8 +12,7 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { Textarea } from "@/components/ui/textarea";
-import { X } from "lucide-react";
+import { Plus, X } from "lucide-react";
 
 interface CustomField {
   name: string;
@@ -35,13 +34,25 @@ export function CustomFieldForm({
   onRemove,
   disabled,
 }: Props) {
-  const handleOptionsChange = (value: string) => {
-    // Split by newline and filter out empty lines
-    const options = value
-      .split("\n")
-      .map((opt) => opt.trim())
-      .filter(Boolean);
-    onUpdate({ ...field, options });
+  const handleAddOption = () => {
+    onUpdate({
+      ...field,
+      options: [...(field.options || []), ""],
+    });
+  };
+
+  const handleRemoveOption = (index: number) => {
+    onUpdate({
+      ...field,
+      options: field.options?.filter((_, i) => i !== index),
+    });
+  };
+
+  const handleOptionChange = (index: number, value: string) => {
+    onUpdate({
+      ...field,
+      options: field.options?.map((opt, i) => (i === index ? value : opt)),
+    });
   };
 
   return (
@@ -75,6 +86,7 @@ export function CustomFieldForm({
             onValueChange={(value: CustomField["type"]) =>
               onUpdate({ ...field, type: value })
             }
+            disabled={disabled}
           >
             <SelectTrigger>
               <SelectValue />
@@ -91,15 +103,46 @@ export function CustomFieldForm({
         {(field.type === "SELECT" ||
           field.type === "MULTI_SELECT" ||
           field.type === "RADIO") && (
-          <div className="space-y-2">
-            <Label>Options (one per line)</Label>
-            <Textarea
-              value={field.options?.join("\n") || ""}
-              onChange={(e) => handleOptionsChange(e.target.value)}
-              placeholder="Enter options..."
-              rows={4}
-              disabled={disabled}
-            />
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <Label>Options</Label>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleAddOption}
+                disabled={disabled}
+              >
+                <Plus className="h-4 w-4 mr-1" />
+                Add Option
+              </Button>
+            </div>
+            <div className="space-y-2">
+              {field.options?.map((option, index) => (
+                <div key={index} className="flex gap-2">
+                  <Input
+                    value={option}
+                    onChange={(e) => handleOptionChange(index, e.target.value)}
+                    placeholder={`Option ${index + 1}`}
+                    disabled={disabled}
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => handleRemoveOption(index)}
+                    disabled={disabled}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
+              {(!field.options || field.options.length === 0) && (
+                <p className="text-sm text-muted-foreground">
+                  Add options for your field
+                </p>
+              )}
+            </div>
           </div>
         )}
 

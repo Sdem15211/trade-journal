@@ -16,11 +16,6 @@ const JournalsPage = async () => {
             <Link href="/dashboard/journals/new">Create New Journal</Link>
           </Button>
         </div>
-        <div>
-          {journals.map((journal) => (
-            <div key={journal.id}>{journal.name}</div>
-          ))}
-        </div>
       </div>
     </div>
   );
