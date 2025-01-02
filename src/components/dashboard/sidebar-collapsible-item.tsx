@@ -19,7 +19,7 @@ import Link from "next/link";
 interface SidebarCollapsibleItemProps {
   icon: ReactNode;
   label: string;
-  items: string[];
+  items: Array<{ id: string; name: string }> | string[];
   baseRoute: string;
 }
 
@@ -34,7 +34,6 @@ export function SidebarCollapsibleItem({
   const isActive = pathname.includes(`/${baseRoute}`);
   const [isOpen, setIsOpen] = useState(isActive);
 
-  // Synchronize open state with active state
   useEffect(() => {
     setIsOpen(isActive);
   }, [isActive]);
@@ -61,12 +60,16 @@ export function SidebarCollapsibleItem({
         <CollapsibleContent>
           <SidebarMenuSub>
             {items.map((item) => {
-              const itemPath = `/${baseRoute}/${item.toLowerCase()}`;
+              const itemName = typeof item === "string" ? item : item.name;
+              const itemId =
+                typeof item === "string" ? item.toLowerCase() : item.id;
+              const itemPath = `/${baseRoute}/${itemId}`;
+
               return (
-                <SidebarMenuSubItem key={item}>
+                <SidebarMenuSubItem key={itemId}>
                   <SidebarMenuButton asChild isActive={pathname === itemPath}>
                     <Link href={itemPath}>
-                      <span>{item}</span>
+                      <span>{itemName}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuSubItem>

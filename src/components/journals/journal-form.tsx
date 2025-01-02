@@ -19,14 +19,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
 import { DatePicker } from "@/components/ui/date-picker";
+import { PlusIcon } from "lucide-react";
 
 // Add this component for default fields display
 function DefaultFieldDisplay() {
   return (
     <div className="space-y-4">
-      <h3 className="text-lg font-semibold">Default Fields</h3>
+      <div className="space-y-2">
+        <h3 className="text-lg font-semibold">Default Fields</h3>
+        <p className="text-sm text-muted-foreground">
+          These are standard fields included in every journal. They cannot be
+          edited or removed.
+        </p>
+      </div>
       <div className="space-y-4">
         {/* Pair Field */}
         <div className="space-y-2">
@@ -98,7 +104,7 @@ export function JournalForm() {
     if (state?.error) {
       toast({
         title: "Error",
-        description: state.error,
+        description: state?.error,
         variant: "destructive",
       });
     } else if (state?.success) {
@@ -138,13 +144,13 @@ export function JournalForm() {
           <CardTitle>Journal Details</CardTitle>
           {state?.error && (
             <div className="text-destructive text-sm mt-2">
-              {Array.isArray(state.error)
-                ? state.error.map((issue) => issue.message).join(", ")
-                : state.error}
+              {Array.isArray(state?.error)
+                ? state?.error.map((issue) => issue.message).join(", ")
+                : state?.error}
             </div>
           )}
         </CardHeader>
-        <CardContent className="space-y-8">
+        <CardContent className="space-y-10">
           <div className="space-y-2">
             <Label htmlFor="name">Journal Name</Label>
             <Input id="name" name="name" disabled={isPending} />
@@ -162,13 +168,18 @@ export function JournalForm() {
           <DefaultFieldDisplay />
 
           <div className="space-y-4">
-            <div className="flex items-center justify-between">
+            <div className="space-y-4">
               <h3 className="text-lg font-semibold">Custom Fields</h3>
+              <p className="text-sm text-muted-foreground">
+                Add your own fields to track specific data points for your
+                trading strategy. These can be customized for each journal.
+              </p>
               <Button
                 type="button"
                 onClick={handleAddField}
                 disabled={isPending}
               >
+                <PlusIcon className="h-4 w-4 mr-2" />
                 Add Field
               </Button>
             </div>
@@ -189,7 +200,7 @@ export function JournalForm() {
             ))}
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-4">
             <div className="flex items-center justify-between">
               <Label>Notes (optional)</Label>
             </div>
