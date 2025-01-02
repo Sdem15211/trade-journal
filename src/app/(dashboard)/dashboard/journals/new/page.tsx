@@ -10,7 +10,7 @@ export default async function NewJournalPage() {
   }
 
   return (
-    <div className="p-4">
+    <div className="p-8">
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-2">
           <h1 className="text-2xl font-bold">Create New Journal</h1>
