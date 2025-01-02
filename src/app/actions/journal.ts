@@ -29,21 +29,27 @@ export async function createJournal(prevState: any, formData: FormData) {
 
     // Parse form data
     const input = {
-      name: formData.get("name"),
-      description: formData.get("description"),
+      name: formData.get("name") as string,
+      description: formData.get("description") as string,
       fields: JSON.parse(formData.get("fields") as string),
     };
 
     // Validate input
-    const validatedData = CreateJournalSchema.parse(input);
+    const validatedData = CreateJournalSchema.safeParse(input);
+
+    if (!validatedData.success) {
+      return {
+        error: validatedData.error.flatten().fieldErrors,
+      };
+    }
 
     await prisma.journal.create({
       data: {
-        name: validatedData.name,
-        description: validatedData.description ?? null,
+        name: input.name,
+        description: input.description ?? null,
         userId: session.user.id!,
         fields: {
-          create: validatedData.fields.map((field, index) => ({
+          create: input.fields.map((field, index) => ({
             name: field.name,
             type: field.type,
             required: field.required,
@@ -64,5 +70,37 @@ export async function createJournal(prevState: any, formData: FormData) {
       return { error: error.errors };
     }
     return { error: "Failed to create journal" };
+  }
+}
+
+export async function deleteJournal(journalId: string) {
+  try {
+    const session = await auth();
+    if (!session?.user) {
+      return { error: "Unauthorized" };
+    }
+
+    // Verify the journal belongs to the user
+    const journal = await prisma.journal.findFirst({
+      where: {
+        id: journalId,
+        userId: session.user.id,
+      },
+    });
+
+    if (!journal) {
+      return { error: "Journal not found" };
+    }
+
+    await prisma.journal.delete({
+      where: {
+        id: journalId,
+      },
+    });
+
+    revalidatePath("/dashboard/journals");
+    return { success: true };
+  } catch (error) {
+    return { error: "Failed to delete journal" };
   }
 }

@@ -25,13 +25,26 @@ import { auth } from "@/lib/auth";
 import { SidebarActiveLink } from "./sidebar-active-link";
 import Link from "next/link";
 import { SidebarMenuButton } from "../ui/sidebar";
-
-const TEMP_JOURNAL_TYPES = ["Forex", "Crypto", "Stocks"];
+import prisma from "@/lib/db";
 
 export async function AppSidebar() {
   const session = await auth();
 
   if (!session?.user) return null;
+
+  // Fetch user's journals
+  const journals = await prisma.journal.findMany({
+    where: {
+      userId: session.user.id,
+    },
+    select: {
+      id: true,
+      name: true,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
 
   return (
     <Sidebar collapsible="icon">
@@ -65,14 +78,14 @@ export async function AppSidebar() {
               <SidebarCollapsibleItem
                 icon={<BookOpen />}
                 label="Journals"
-                items={TEMP_JOURNAL_TYPES}
+                items={journals}
                 baseRoute="dashboard/journals"
               />
 
               <SidebarCollapsibleItem
                 icon={<Database />}
                 label="Backtesting"
-                items={TEMP_JOURNAL_TYPES}
+                items={journals}
                 baseRoute="dashboard/backtesting"
               />
 
