@@ -26,6 +26,7 @@ import { SidebarActiveLink } from "./sidebar-active-link";
 import Link from "next/link";
 import { SidebarMenuButton } from "../ui/sidebar";
 import prisma from "@/lib/db";
+import { createSlug } from "@/lib/utils";
 
 export async function AppSidebar() {
   const session = await auth();

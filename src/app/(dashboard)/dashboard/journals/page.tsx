@@ -14,6 +14,7 @@ import Link from "next/link";
 import React from "react";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
+import { createSlug } from "@/lib/utils";
 
 const JournalsPage = async () => {
   const session = await auth();
@@ -71,7 +72,11 @@ const JournalsPage = async () => {
                         className="w-20"
                         asChild
                       >
-                        <Link href={`/dashboard/journals/${journal.id}`}>
+                        <Link
+                          href={`/dashboard/journals/${createSlug(
+                            journal.name
+                          )}`}
+                        >
                           Open
                         </Link>
                       </Button>
