@@ -159,41 +159,51 @@ export function JournalDetail({
             <TableBody>
               {journal.trades.map((trade) => (
                 <TableRow key={trade.id}>
-                  <TableCell>{trade.pair}</TableCell>
-                  <TableCell>
+                  <TableCell className="font-bold">{trade.pair}</TableCell>
+                  <TableCell className="text-xs font-medium">
                     <div>open: {formatDate(trade.openDate)}</div>
                     <div>close: {formatDate(trade.closeDate)}</div>
                   </TableCell>
                   <TableCell>
                     <span
-                      className={`inline-flex items-center justify-center rounded-md px-2 py-1 text-xs ${
+                      className={`inline-flex items-center justify-center rounded-md px-2 py-1 text-xs font-bold ${
                         trade.result === "WIN"
-                          ? "bg-green-100 text-green-700"
+                          ? "bg-green-200 text-green-900"
                           : trade.result === "LOSS"
-                          ? "bg-red-100 text-red-700"
-                          : "bg-gray-100 text-gray-700"
+                          ? "bg-red-200 text-red-900"
+                          : "bg-slate-200 text-slate-900"
                       }`}
                     >
-                      {trade.result}
+                      {trade.result === "BREAKEVEN"
+                        ? "BE"
+                        : trade.result === "LOSS"
+                        ? "Loss"
+                        : "Win"}
                     </span>
                   </TableCell>
-                  <TableCell>{trade.pnl}%</TableCell>
+                  <TableCell className="font-medium">{trade.pnl}%</TableCell>
                   {journal.fields.map((field) => (
-                    <TableCell key={field.id}>
+                    <TableCell key={field.id} className="font-medium">
                       {field.type === "MULTI_SELECT" ? (
                         <div className="flex gap-1 flex-wrap">
-                          {(
-                            (trade.fields as Record<string, string[]>)[
+                          {Array.isArray(
+                            (trade.fields as Record<string, unknown>)[
                               field.name
-                            ] || []
-                          ).map((value, i) => (
-                            <span
-                              key={i}
-                              className="bg-gray-100 px-2 py-1 rounded-md text-xs"
-                            >
-                              {value}
-                            </span>
-                          ))}
+                            ]
+                          )
+                            ? (
+                                (trade.fields as Record<string, string[]>)[
+                                  field.name
+                                ] || []
+                              ).map((value, i) => (
+                                <span
+                                  key={i}
+                                  className="bg-slate-200 px-2 py-1 rounded-md text-xs"
+                                >
+                                  {value}
+                                </span>
+                              ))
+                            : null}
                         </div>
                       ) : (
                         (trade.fields as Record<string, string>)[field.name]
