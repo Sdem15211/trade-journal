@@ -105,7 +105,6 @@ enum FieldType {
   TEXT
   SELECT
   MULTI_SELECT
-  RADIO
 }
 
 enum TradeResult {

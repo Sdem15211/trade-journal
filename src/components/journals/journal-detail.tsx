@@ -24,6 +24,7 @@ import type { Journal, JournalField, Trade } from "@prisma/client";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { createSlug } from "@/lib/utils";
+import { LogTradeDialog } from "@/components/journals/log-trade-dialog";
 
 interface JournalDetailProps {
   journal: Journal & {
@@ -137,13 +138,7 @@ export function JournalDetail({
             Edit journal
           </Link>
         </Button>
-        <Button asChild>
-          <Link
-            href={`/dashboard/journals/${createSlug(journal.name)}/trades/new`}
-          >
-            Log trade
-          </Link>
-        </Button>
+        <LogTradeDialog journal={journal} />
       </div>
 
       <Card>
