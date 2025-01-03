@@ -69,6 +69,17 @@ export async function createJournal(prevState: any, formData: FormData) {
     if (error instanceof z.ZodError) {
       return { error: error.errors };
     }
+
+    // Handle Prisma unique constraint error
+    if (
+      error instanceof Error &&
+      error.message.includes(
+        "Unique constraint failed on the fields: (`name`,`userId`)"
+      )
+    ) {
+      return { error: "You already have a journal with this name" };
+    }
+
     return { error: "Failed to create journal" };
   }
 }

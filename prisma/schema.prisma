@@ -65,6 +65,7 @@ model Journal {
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
 
+  @@unique([name, userId])
   @@index([userId])
 }
 
