@@ -15,6 +15,7 @@ import {
 } from "../ui/collapsible";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
+import { createSlug } from "@/lib/utils";
 
 interface SidebarCollapsibleItemProps {
   icon: ReactNode;
@@ -61,9 +62,9 @@ export function SidebarCollapsibleItem({
           <SidebarMenuSub>
             {items.map((item) => {
               const itemName = typeof item === "string" ? item : item.name;
-              const itemId =
-                typeof item === "string" ? item.toLowerCase() : item.id;
-              const itemPath = `/${baseRoute}/${itemId}`;
+              const itemId = typeof item === "string" ? item : item.id;
+              const slug = createSlug(itemName);
+              const itemPath = `/${baseRoute}/${slug}`;
 
               return (
                 <SidebarMenuSubItem key={itemId}>
