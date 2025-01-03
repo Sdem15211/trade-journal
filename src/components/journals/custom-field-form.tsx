@@ -16,7 +16,7 @@ import { Plus, X } from "lucide-react";
 
 interface CustomField {
   name: string;
-  type: "TEXT" | "SELECT" | "MULTI_SELECT" | "RADIO";
+  type: "TEXT" | "SELECT" | "MULTI_SELECT";
   required: boolean;
   options?: string[];
 }
@@ -95,14 +95,11 @@ export function CustomFieldForm({
               <SelectItem value="TEXT">Text Input</SelectItem>
               <SelectItem value="SELECT">Single Select</SelectItem>
               <SelectItem value="MULTI_SELECT">Multi Select</SelectItem>
-              <SelectItem value="RADIO">Radio Buttons</SelectItem>
             </SelectContent>
           </Select>
         </div>
 
-        {(field.type === "SELECT" ||
-          field.type === "MULTI_SELECT" ||
-          field.type === "RADIO") && (
+        {(field.type === "SELECT" || field.type === "MULTI_SELECT") && (
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <Label>Options</Label>

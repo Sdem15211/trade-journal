@@ -17,7 +17,6 @@ export default async function JournalPage({
   }
   const name = (await params).name;
 
-  // Fetch all journals to find the one matching the slug
   const journals = await prisma.journal.findMany({
     where: {
       userId: session.user.id,
