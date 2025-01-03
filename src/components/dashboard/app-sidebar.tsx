@@ -106,26 +106,6 @@ export async function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-
-        <SidebarGroup>
-          <SidebarGroupLabel>Settings</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarActiveLink href="/account">
-                  <BadgeCheck />
-                  <span>Account</span>
-                </SidebarActiveLink>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarActiveLink href="/billing">
-                  <CreditCard />
-                  <span>Billing</span>
-                </SidebarActiveLink>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
       </SidebarContent>
 
       <SidebarFooter>

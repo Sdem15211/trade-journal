@@ -116,7 +116,7 @@ export function LogTradeDialog({ journal }: LogTradeDialogProps) {
                   <Button
                     variant="outline"
                     className={cn(
-                      "w-full pl-3 text-left font-normal",
+                      "w-full pl-3 text-left font-normal bg-slate-100",
                       !openDate && "text-muted-foreground"
                     )}
                     disabled={isPending}
@@ -147,7 +147,7 @@ export function LogTradeDialog({ journal }: LogTradeDialogProps) {
                   <Button
                     variant="outline"
                     className={cn(
-                      "w-full pl-3 text-left font-normal",
+                      "w-full pl-3 text-left font-normal bg-slate-100",
                       !closeDate && "text-muted-foreground"
                     )}
                     disabled={isPending}
@@ -254,7 +254,7 @@ export function LogTradeDialog({ journal }: LogTradeDialogProps) {
               Cancel
             </Button>
             <Button type="submit" disabled={isPending}>
-              Log
+              {isPending ? "Logging..." : "Log"}
             </Button>
           </div>
         </form>
