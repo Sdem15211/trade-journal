@@ -12,124 +12,81 @@ import { createJournal } from "@/app/actions/journal";
 import type { CreateJournalInput } from "@/app/actions/journal";
 import { useToast } from "@/hooks/use-toast";
 import { useActionState } from "react";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { DatePicker } from "@/components/ui/date-picker";
-import { PlusIcon } from "lucide-react";
+import { CheckCircle2, PlusIcon } from "lucide-react";
+import { Alert, AlertDescription } from "../ui/alert";
+import { DefaultFieldDisplay } from "./default-field-display";
 
-// Add this component for default fields display
-function DefaultFieldDisplay() {
-  return (
-    <div className="space-y-4">
-      <div className="space-y-2">
-        <h3 className="text-lg font-semibold">Default Fields</h3>
-        <p className="text-sm text-muted-foreground">
-          These are standard fields included in every journal. They cannot be
-          edited or removed.
-        </p>
-      </div>
-      <div className="space-y-4">
-        {/* Pair Field */}
-        <div className="space-y-2">
-          <Label>Pair</Label>
-          <Input placeholder="Fill in the pair" disabled />
-        </div>
-
-        {/* Date Fields */}
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div className="space-y-2">
-            <Label>Open date</Label>
-            <DatePicker disabled />
-          </div>
-          <div className="space-y-2">
-            <Label>Close date</Label>
-            <DatePicker disabled />
-          </div>
-        </div>
-
-        {/* Result and P&L Fields */}
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div className="space-y-2">
-            <Label>Result</Label>
-            <Select disabled>
-              <SelectTrigger>
-                <SelectValue placeholder="Select" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="WIN">Win</SelectItem>
-                <SelectItem value="LOSS">Loss</SelectItem>
-                <SelectItem value="BREAKEVEN">Break-even</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-2">
-            <Label>P&L</Label>
-            <div className="relative">
-              <Input
-                type="number"
-                step="0.01"
-                placeholder="0.00"
-                disabled
-                className="pr-6"
-              />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                %
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+export interface ActionResponse {
+  success: boolean;
+  message: string;
+  errors?: {
+    [K in keyof CreateJournalInput]?: string[];
+  };
 }
+
+const initialState: ActionResponse = {
+  success: false,
+  message: "",
+};
 
 export function JournalForm() {
   const router = useRouter();
   const { toast } = useToast();
   const [customFields, setCustomFields] = useState<
-    CreateJournalInput["fields"]
+    Array<{
+      type: "TEXT" | "SELECT" | "MULTI_SELECT";
+      name: string;
+      options?: string[];
+      required: boolean;
+    }>
   >([]);
 
   const [state, formAction, isPending] = useActionState(
     createJournal,
-    undefined
+    initialState
   );
 
   useEffect(() => {
-    if (state?.error) {
-      toast({
-        title: "Error",
-        description: state?.error,
-        variant: "destructive",
-      });
-    } else if (state?.success) {
+    if (state.success) {
       toast({
         title: "Success",
-        description: "Journal created successfully",
+        description: state.message || "Journal created successfully",
       });
       router.push("/dashboard/journals");
     }
   }, [state, toast, router]);
 
   const handleAddField = () => {
-    setCustomFields([
-      ...customFields,
-      { name: "", type: "TEXT", required: false },
+    setCustomFields((prev) => [
+      ...prev,
+      {
+        type: "TEXT",
+        name: "",
+        required: false,
+        options: undefined,
+      },
     ]);
   };
 
   const handleUpdateField = (
     index: number,
-    field: CreateJournalInput["fields"][number]
+    field: {
+      type: "TEXT" | "SELECT" | "MULTI_SELECT";
+      name: string;
+      options?: string[];
+      required: boolean;
+    }
   ) => {
-    const newFields = [...customFields];
-    newFields[index] = field;
-    setCustomFields(newFields);
+    setCustomFields((prev) => {
+      const updated = [...prev];
+      if (field.type === "SELECT" || field.type === "MULTI_SELECT") {
+        field.options = field.options || [""];
+      } else {
+        field.options = undefined;
+      }
+      updated[index] = field;
+      return updated;
+    });
   };
 
   const handleRemoveField = (index: number) => {
@@ -142,18 +99,19 @@ export function JournalForm() {
       <Card className="w-2/3 mx-auto">
         <CardHeader>
           <CardTitle>Journal Details</CardTitle>
-          {state?.error && (
-            <div className="text-destructive text-sm mt-2">
-              {Array.isArray(state?.error)
-                ? state?.error.map((issue) => issue.message).join(", ")
-                : state?.error}
-            </div>
-          )}
         </CardHeader>
         <CardContent className="space-y-10">
           <div className="space-y-2">
             <Label htmlFor="name">Journal Name</Label>
-            <Input id="name" name="name" disabled={isPending} />
+            <Input
+              id="name"
+              name="name"
+              disabled={isPending}
+              className={state?.errors?.name ? "border-red-500" : ""}
+            />
+            {state?.errors?.name && (
+              <p className="text-sm text-red-500">{state.errors.name[0]}</p>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -167,21 +125,13 @@ export function JournalForm() {
 
           <DefaultFieldDisplay />
 
-          <div className="space-y-4">
+          <div className="space-y-6">
             <div className="space-y-4">
               <h3 className="text-lg font-semibold">Custom Fields</h3>
               <p className="text-sm text-muted-foreground">
                 Add your own fields to track specific data points for your
                 trading strategy. These can be customized for each journal.
               </p>
-              <Button
-                type="button"
-                onClick={handleAddField}
-                disabled={isPending}
-              >
-                <PlusIcon className="h-4 w-4 mr-2" />
-                Add Field
-              </Button>
             </div>
 
             {customFields.map((field, index) => (
@@ -198,14 +148,18 @@ export function JournalForm() {
                 disabled={isPending}
               />
             ))}
+            <Button type="button" onClick={handleAddField} disabled={isPending}>
+              <PlusIcon className="h-4 w-4 mr-2" />
+              {customFields.length > 0 ? "Add another field" : "Add Field"}
+            </Button>
           </div>
 
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <Label>Notes (optional)</Label>
-            </div>
-            <Textarea disabled placeholder="notes" className="resize-none" />
-          </div>
+          {state?.message && (
+            <Alert variant={state.success ? "default" : "destructive"}>
+              {state.success && <CheckCircle2 className="h-4 w-4" />}
+              <AlertDescription>{state.message}</AlertDescription>
+            </Alert>
+          )}
 
           <div className="flex justify-end gap-4">
             <Button
@@ -217,7 +171,7 @@ export function JournalForm() {
               Cancel
             </Button>
             <Button type="submit" disabled={isPending}>
-              Create Journal
+              {isPending ? "Creating..." : "Create Journal"}
             </Button>
           </div>
         </CardContent>

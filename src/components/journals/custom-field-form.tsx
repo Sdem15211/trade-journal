@@ -55,6 +55,17 @@ export function CustomFieldForm({
     });
   };
 
+  const handleTypeChange = (value: CustomField["type"]) => {
+    onUpdate({
+      ...field,
+      type: value,
+      options:
+        value === "MULTI_SELECT" || value === "SELECT"
+          ? field.options || [""]
+          : undefined,
+    });
+  };
+
   return (
     <Card>
       <CardContent className="pt-6 space-y-4">
@@ -83,9 +94,7 @@ export function CustomFieldForm({
           <Label>Field Type</Label>
           <Select
             value={field.type}
-            onValueChange={(value: CustomField["type"]) =>
-              onUpdate({ ...field, type: value })
-            }
+            onValueChange={handleTypeChange}
             disabled={disabled}
           >
             <SelectTrigger>

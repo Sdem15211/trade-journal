@@ -88,7 +88,7 @@ const JournalsPage = async () => {
                         className={
                           trades.length > 0
                             ? winRate > 0
-                              ? "text-green-700"
+                              ? "text-green-500"
                               : winRate < 0
                               ? "text-red-700"
                               : ""
@@ -103,7 +103,7 @@ const JournalsPage = async () => {
                         className={
                           trades.length > 0
                             ? cummProfit > 0
-                              ? "text-green-700"
+                              ? "text-green-500"
                               : cummProfit < 0
                               ? "text-red-700"
                               : ""

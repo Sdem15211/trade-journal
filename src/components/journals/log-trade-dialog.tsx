@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { CalendarIcon, X } from "lucide-react";
+import { CalendarIcon, CheckCircle2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -32,6 +32,9 @@ import { useToast } from "@/hooks/use-toast";
 import { createTrade } from "@/app/actions/trade";
 import { useActionState } from "react";
 import type { Journal, JournalField } from "@prisma/client";
+import { MultiSelect } from "@/components/ui/multi-select";
+import type { TradeActionResponse } from "@/app/actions/trade";
+import { Alert, AlertDescription } from "../ui/alert";
 
 interface LogTradeDialogProps {
   journal: Journal & {
@@ -39,30 +42,45 @@ interface LogTradeDialogProps {
   };
 }
 
+const initialState: TradeActionResponse = {
+  success: false,
+  message: "",
+};
+
 export function LogTradeDialog({ journal }: LogTradeDialogProps) {
   const [open, setOpen] = React.useState(false);
   const { toast } = useToast();
-  const [state, formAction, isPending] = useActionState(createTrade, undefined);
+  const [state, formAction, isPending] = useActionState(
+    createTrade,
+    initialState
+  );
   const [openDate, setOpenDate] = React.useState<Date>();
   const [closeDate, setCloseDate] = React.useState<Date>();
+  const [selectedValues, setSelectedValues] = React.useState<
+    Record<string, string[]>
+  >({});
 
   React.useEffect(() => {
-    if (state?.error) {
+    if (state?.message) {
       toast({
-        title: "Error",
-        description: state.error,
-        variant: "destructive",
+        title: state.success ? "Success" : "Error",
+        description: state.message,
+        variant: state.success ? "default" : "destructive",
       });
-    } else if (state?.success) {
-      toast({
-        title: "Success",
-        description: "Trade logged successfully",
-      });
-      setOpen(false);
-      setOpenDate(undefined);
-      setCloseDate(undefined);
+
+      if (state.success) {
+        setOpen(false);
+        setOpenDate(undefined);
+        setCloseDate(undefined);
+      }
     }
   }, [state, toast]);
+
+  React.useEffect(() => {
+    if (!open) {
+      setSelectedValues({});
+    }
+  }, [open]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -90,14 +108,6 @@ export function LogTradeDialog({ journal }: LogTradeDialogProps) {
             value={closeDate?.toISOString() ?? ""}
           />
 
-          {state?.error && (
-            <div className="text-destructive text-sm">
-              {Array.isArray(state.error)
-                ? state.error.map((issue) => issue.message).join(", ")
-                : state.error}
-            </div>
-          )}
-
           <div className="space-y-2">
             <Label htmlFor="pair">Pair</Label>
             <Input
@@ -105,7 +115,11 @@ export function LogTradeDialog({ journal }: LogTradeDialogProps) {
               name="pair"
               placeholder="Fill in the pair"
               disabled={isPending}
+              className={state?.errors?.pair ? "border-destructive" : ""}
             />
+            {state?.errors?.pair && (
+              <p className="text-sm text-red-500">{state.errors.pair[0]}</p>
+            )}
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -216,7 +230,7 @@ export function LogTradeDialog({ journal }: LogTradeDialogProps) {
                   name={`fields.${field.name}`}
                   disabled={isPending}
                 />
-              ) : field.type === "SELECT" || field.type === "MULTI_SELECT" ? (
+              ) : field.type === "SELECT" ? (
                 <Select name={`fields.${field.name}`} disabled={isPending}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select" />
@@ -229,6 +243,29 @@ export function LogTradeDialog({ journal }: LogTradeDialogProps) {
                     ))}
                   </SelectContent>
                 </Select>
+              ) : field.type === "MULTI_SELECT" ? (
+                <>
+                  <input
+                    type="hidden"
+                    name={`fields.${field.name}`}
+                    value={
+                      selectedValues[field.name]
+                        ? JSON.stringify(selectedValues[field.name])
+                        : "[]"
+                    }
+                  />
+                  <MultiSelect
+                    options={field.options ?? []}
+                    selected={selectedValues[field.name] ?? []}
+                    onChange={(values) =>
+                      setSelectedValues((prev) => ({
+                        ...prev,
+                        [field.name]: values,
+                      }))
+                    }
+                    disabled={isPending}
+                  />
+                </>
               ) : null}
             </div>
           ))}
@@ -243,6 +280,13 @@ export function LogTradeDialog({ journal }: LogTradeDialogProps) {
               disabled={isPending}
             />
           </div>
+
+          {state?.message && (
+            <Alert variant={state.success ? "default" : "destructive"}>
+              {state.success && <CheckCircle2 className="h-4 w-4" />}
+              <AlertDescription>{state.message}</AlertDescription>
+            </Alert>
+          )}
 
           <div className="flex justify-end gap-4">
             <Button

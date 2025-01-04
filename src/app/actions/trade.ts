@@ -18,11 +18,22 @@ const TradeSchema = z.object({
 
 export type CreateTradeInput = z.infer<typeof TradeSchema>;
 
-export async function createTrade(prevState: any, formData: FormData) {
+export interface TradeActionResponse {
+  success: boolean;
+  message: string;
+  errors?: {
+    [K in keyof CreateTradeInput]?: string[];
+  };
+}
+
+export async function createTrade(
+  prevState: TradeActionResponse | null,
+  formData: FormData
+): Promise<TradeActionResponse> {
   try {
     const session = await auth();
     if (!session?.user) {
-      return { error: "Unauthorized" };
+      return { success: false, message: "Unauthorized" };
     }
 
     // Process custom fields
@@ -30,7 +41,16 @@ export async function createTrade(prevState: any, formData: FormData) {
     for (const [key, value] of formData.entries()) {
       if (key.startsWith("fields.")) {
         const fieldName = key.replace("fields.", "");
-        customFields[fieldName] = value as string;
+        try {
+          const parsedValue = JSON.parse(value as string);
+          if (Array.isArray(parsedValue)) {
+            customFields[fieldName] = parsedValue;
+          } else {
+            customFields[fieldName] = value as string;
+          }
+        } catch {
+          customFields[fieldName] = value as string;
+        }
       }
     }
 
@@ -51,7 +71,9 @@ export async function createTrade(prevState: any, formData: FormData) {
 
     if (!validatedData.success) {
       return {
-        error: validatedData.error.flatten().fieldErrors,
+        success: false,
+        message: "Please fix the errors in the input fields",
+        errors: validatedData.error.flatten().fieldErrors,
       };
     }
 
@@ -64,25 +86,26 @@ export async function createTrade(prevState: any, formData: FormData) {
     });
 
     if (!journal) {
-      return { error: "Journal not found" };
+      return { success: false, message: "Journal not found" };
     }
 
     await prisma.trade.create({
       data: {
-        journalId: input.journalId,
-        pair: input.pair,
-        openDate: input.openDate,
-        closeDate: input.closeDate,
-        result: input.result,
-        pnl: input.pnl,
-        notes: input.notes,
-        fields: input.fields,
+        journalId: validatedData.data.journalId,
+        pair: validatedData.data.pair,
+        openDate: validatedData.data.openDate,
+        closeDate: validatedData.data.closeDate,
+        result: validatedData.data.result,
+        pnl: validatedData.data.pnl,
+        notes: validatedData.data.notes,
+        fields: validatedData.data.fields,
       },
     });
 
     revalidatePath(`/dashboard/journals/${journal.name}`);
-    return { success: true };
+    return { success: true, message: "Trade logged successfully" };
   } catch (error) {
-    return { error: "Failed to create trade" };
+    console.error("Trade creation error:", error);
+    return { success: false, message: "Failed to create trade" };
   }
 }

@@ -198,7 +198,7 @@ export function JournalDetail({
                               ).map((value, i) => (
                                 <span
                                   key={i}
-                                  className="bg-slate-200 px-2 py-1 rounded-md text-xs"
+                                  className="inline-flex items-center rounded-md bg-slate-200 px-2 py-1 text-xs"
                                 >
                                   {value}
                                 </span>
