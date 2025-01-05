@@ -8,7 +8,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { deleteJournal } from "@/app/actions/journal";
+import { deleteJournal } from "@/app/(server)/actions/journal";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import {

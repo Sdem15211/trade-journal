@@ -22,7 +22,7 @@ import {
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
-import { deleteTrade } from "@/app/actions/trade";
+import { deleteTrade } from "@/app/(server)/actions/trade";
 import { ModifyTradeDialog } from "./modify-trade-dialog";
 import type { Journal, JournalField, Trade } from "@prisma/client";
 

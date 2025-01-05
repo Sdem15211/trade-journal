@@ -29,10 +29,10 @@ import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
-import { createTrade } from "@/app/actions/trade";
+import { createTrade } from "@/app/(server)/actions/trade";
 import { useActionState } from "react";
 import type { Journal, JournalField } from "@prisma/client";
-import type { TradeActionResponse } from "@/app/actions/trade";
+import type { TradeActionResponse } from "@/app/(server)/actions/trade";
 import { Alert, AlertDescription } from "../ui/alert";
 import { MultiSelect } from "../ui/multi-select";
 
