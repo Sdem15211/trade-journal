@@ -32,9 +32,9 @@ import { useToast } from "@/hooks/use-toast";
 import { createTrade } from "@/app/actions/trade";
 import { useActionState } from "react";
 import type { Journal, JournalField } from "@prisma/client";
-import { MultiSelect } from "@/components/ui/multi-select";
 import type { TradeActionResponse } from "@/app/actions/trade";
 import { Alert, AlertDescription } from "../ui/alert";
+import { MultiSelect } from "../ui/multi-select";
 
 interface LogTradeDialogProps {
   journal: Journal & {
@@ -56,9 +56,6 @@ export function LogTradeDialog({ journal }: LogTradeDialogProps) {
   );
   const [openDate, setOpenDate] = React.useState<Date>();
   const [closeDate, setCloseDate] = React.useState<Date>();
-  const [selectedValues, setSelectedValues] = React.useState<
-    Record<string, string[]>
-  >({});
 
   React.useEffect(() => {
     if (state?.message) {
@@ -75,12 +72,6 @@ export function LogTradeDialog({ journal }: LogTradeDialogProps) {
       }
     }
   }, [state, toast]);
-
-  React.useEffect(() => {
-    if (!open) {
-      setSelectedValues({});
-    }
-  }, [open]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -194,9 +185,21 @@ export function LogTradeDialog({ journal }: LogTradeDialogProps) {
                   <SelectValue placeholder="Select" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="WIN">Win</SelectItem>
-                  <SelectItem value="LOSS">Loss</SelectItem>
-                  <SelectItem value="BREAKEVEN">Break-even</SelectItem>
+                  <SelectItem value="WIN">
+                    <span className="inline-flex items-center justify-center rounded-md px-2 py-1 text-xs font-bold text-green-900 bg-green-200">
+                      Win
+                    </span>
+                  </SelectItem>
+                  <SelectItem value="LOSS">
+                    <span className="inline-flex items-center justify-center rounded-md px-2 py-1 text-xs font-bold text-red-900 bg-red-200">
+                      Loss
+                    </span>
+                  </SelectItem>
+                  <SelectItem value="BREAKEVEN">
+                    <span className="inline-flex items-center justify-center rounded-md px-2 py-1 text-xs font-bold text-slate-900 bg-slate-200">
+                      BE
+                    </span>
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -244,28 +247,11 @@ export function LogTradeDialog({ journal }: LogTradeDialogProps) {
                   </SelectContent>
                 </Select>
               ) : field.type === "MULTI_SELECT" ? (
-                <>
-                  <input
-                    type="hidden"
-                    name={`fields.${field.name}`}
-                    value={
-                      selectedValues[field.name]
-                        ? JSON.stringify(selectedValues[field.name])
-                        : "[]"
-                    }
-                  />
-                  <MultiSelect
-                    options={field.options ?? []}
-                    selected={selectedValues[field.name] ?? []}
-                    onChange={(values) =>
-                      setSelectedValues((prev) => ({
-                        ...prev,
-                        [field.name]: values,
-                      }))
-                    }
-                    disabled={isPending}
-                  />
-                </>
+                <MultiSelect
+                  name={`fields.${field.name}`}
+                  options={field.options ?? []}
+                  disabled={isPending}
+                />
               ) : null}
             </div>
           ))}

@@ -1,113 +1,119 @@
 "use client";
 
 import * as React from "react";
-import { X } from "lucide-react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-} from "@/components/ui/command";
+import { ChevronDown, X } from "lucide-react";
 import {
   Popover,
-  PopoverContent,
   PopoverTrigger,
+  PopoverContent,
 } from "@/components/ui/popover";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
 interface MultiSelectProps {
-  options?: string[];
-  selected: string[];
-  onChange: (values: string[]) => void;
-  placeholder?: string;
+  options: string[];
+  name: string;
   disabled?: boolean;
+  defaultValue?: string[];
 }
 
 export function MultiSelect({
-  options = [],
-  selected,
-  onChange,
-  placeholder = "Select options...",
-  disabled = false,
+  options,
+  name,
+  disabled,
+  defaultValue = [],
 }: MultiSelectProps) {
-  const [open, setOpen] = React.useState(false);
+  const [selectedOptions, setSelectedOptions] =
+    useState<string[]>(defaultValue);
+  const [open, setOpen] = useState(false);
 
-  const handleSelect = (value: string) => {
-    const newSelected = selected.includes(value)
-      ? selected.filter((item) => item !== value)
-      : [...selected, value];
-    onChange(newSelected);
+  const handleSelect = (option: string) => {
+    if (!selectedOptions.includes(option)) {
+      setSelectedOptions([...selectedOptions, option]);
+    } else {
+      handleRemove(option);
+    }
   };
 
-  const handleRemove = (value: string) => {
-    onChange(selected.filter((item) => item !== value));
+  const handleRemove = (option: string, e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    setSelectedOptions(selectedOptions.filter((item) => item !== option));
   };
 
   return (
-    <div className="flex flex-col gap-2">
+    <div>
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button
             variant="outline"
             role="combobox"
             aria-expanded={open}
-            className="w-full justify-between bg-slate-100 hover:bg-slate-200"
+            className={cn(
+              "w-full justify-between bg-slate-100 h-auto",
+              selectedOptions.length > 0 && "h-auto py-2"
+            )}
             disabled={disabled}
           >
-            {selected.length === 0
-              ? placeholder
-              : `${selected.length} selected`}
+            <div className="flex flex-wrap gap-2">
+              {selectedOptions.length > 0 ? (
+                selectedOptions.map((option) => (
+                  <Badge
+                    key={option}
+                    variant="secondary"
+                    className="flex items-center gap-1"
+                  >
+                    {option}
+                    <span
+                      role="button"
+                      onClick={(e) => handleRemove(option, e)}
+                      className="ml-1 cursor-pointer rounded-sm text-sm hover:text-destructive disabled:cursor-not-allowed"
+                      aria-disabled={disabled}
+                    >
+                      <X className="size-2" />
+                    </span>
+                  </Badge>
+                ))
+              ) : (
+                <span className="font-normal">Select</span>
+              )}
+            </div>
+            <ChevronDown
+              className={cn(
+                "ml-2 h-4 w-4 shrink-0 opacity-50",
+                open && "rotate-180 transition-transform"
+              )}
+            />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-full p-0">
-          <Command>
-            <CommandInput placeholder="Search options..." />
-            <CommandEmpty>No options found.</CommandEmpty>
-            <CommandGroup>
-              {options.map((option) => (
-                <CommandItem
-                  key={option}
-                  value={option}
-                  onSelect={() => handleSelect(option)}
-                >
-                  <div
-                    className={`mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary ${
-                      selected.includes(option)
-                        ? "bg-primary text-primary-foreground"
-                        : "opacity-50 [&_svg]:invisible"
-                    }`}
-                  >
-                    <span className="h-4 w-4 rounded-sm bg-slate-200" />
-                  </div>
-                  {option}
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          </Command>
+        <PopoverContent
+          className="w-[--radix-popover-trigger-width] p-0"
+          style={{ width: "var(--radix-popover-trigger-width)" }}
+          align="start"
+        >
+          <div className="flex flex-wrap gap-2 p-4">
+            {options.map((option) => (
+              <Badge
+                key={option}
+                variant={
+                  selectedOptions.includes(option) ? "secondary" : "outline"
+                }
+                className={cn(
+                  "cursor-pointer hover:bg-secondary transition-colors",
+                  selectedOptions.includes(option) && "bg-secondary",
+                  !selectedOptions.includes(option) &&
+                    "bg-background hover:text-secondary-foreground"
+                )}
+                onClick={() => handleSelect(option)}
+              >
+                {option}
+              </Badge>
+            ))}
+          </div>
         </PopoverContent>
       </Popover>
-
-      {selected.length > 0 && (
-        <div className="flex flex-wrap gap-1">
-          {selected.map((value) => (
-            <span
-              key={value}
-              className="inline-flex items-center gap-1 rounded-md bg-slate-200 px-2 py-1 text-xs"
-            >
-              {value}
-              <button
-                type="button"
-                className="text-slate-600 hover:text-slate-900"
-                onClick={() => handleRemove(value)}
-                disabled={disabled}
-              >
-                <X className="h-3 w-3" />
-              </button>
-            </span>
-          ))}
-        </div>
-      )}
+      <input type="hidden" name={name} value={selectedOptions.join(",")} />
     </div>
   );
 }
