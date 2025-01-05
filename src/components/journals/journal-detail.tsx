@@ -25,6 +25,8 @@ import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { createSlug } from "@/lib/utils";
 import { LogTradeDialog } from "@/components/journals/log-trade-dialog";
+import { Badge } from "@/components/ui/badge";
+import { TradeActions } from "@/components/journals/trade-actions";
 
 interface JournalDetailProps {
   journal: Journal & {
@@ -143,78 +145,128 @@ export function JournalDetail({
 
       <Card>
         <CardContent className="p-4">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Pair</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead>Result</TableHead>
-                <TableHead>P&L</TableHead>
-                {journal.fields.map((field) => (
-                  <TableHead key={field.id}>{field.name}</TableHead>
-                ))}
-                <TableHead>Notes</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {journal.trades.map((trade) => (
-                <TableRow key={trade.id}>
-                  <TableCell className="font-bold">{trade.pair}</TableCell>
-                  <TableCell className="text-xs font-medium">
-                    <div>open: {formatDate(trade.openDate)}</div>
-                    <div>close: {formatDate(trade.closeDate)}</div>
-                  </TableCell>
-                  <TableCell>
-                    <span
-                      className={`inline-flex items-center justify-center rounded-md px-2 py-1 text-xs font-bold ${
-                        trade.result === "WIN"
-                          ? "bg-green-200 text-green-900"
-                          : trade.result === "LOSS"
-                          ? "bg-red-200 text-red-900"
-                          : "bg-slate-200 text-slate-900"
-                      }`}
-                    >
-                      {trade.result === "BREAKEVEN"
-                        ? "BE"
-                        : trade.result === "LOSS"
-                        ? "Loss"
-                        : "Win"}
-                    </span>
-                  </TableCell>
-                  <TableCell className="font-medium">{trade.pnl}%</TableCell>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="whitespace-nowrap px-8 min-w-[120px]">
+                    Pair
+                  </TableHead>
+                  <TableHead className="whitespace-nowrap px-8 min-w-[180px]">
+                    Date
+                  </TableHead>
+                  <TableHead className="whitespace-nowrap px-8 min-w-[100px]">
+                    Result
+                  </TableHead>
+                  <TableHead className="whitespace-nowrap px-8 min-w-[100px]">
+                    P&L
+                  </TableHead>
                   {journal.fields.map((field) => (
-                    <TableCell key={field.id} className="font-medium">
-                      {field.type === "MULTI_SELECT" ? (
-                        <div className="flex gap-1 flex-wrap">
-                          {Array.isArray(
-                            (trade.fields as Record<string, unknown>)[
-                              field.name
-                            ]
-                          )
-                            ? (
-                                (trade.fields as Record<string, string[]>)[
-                                  field.name
-                                ] || []
-                              ).map((value, i) => (
-                                <span
-                                  key={i}
-                                  className="inline-flex items-center rounded-md bg-slate-200 px-2 py-1 text-xs"
-                                >
-                                  {value}
-                                </span>
-                              ))
-                            : null}
-                        </div>
-                      ) : (
-                        (trade.fields as Record<string, string>)[field.name]
-                      )}
-                    </TableCell>
+                    <TableHead
+                      key={field.id}
+                      className="whitespace-nowrap px-8 min-w-[180px]"
+                    >
+                      {field.name}
+                    </TableHead>
                   ))}
-                  <TableCell>{trade.notes}</TableCell>
+                  <TableHead className="whitespace-nowrap px-8 min-w-[250px]">
+                    Notes
+                  </TableHead>
+                  <TableHead className="w-[100px]"></TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {journal.trades.map((trade) => (
+                  <TableRow key={trade.id}>
+                    <TableCell className="font-bold whitespace-nowrap px-8 min-w-[120px]">
+                      {trade.pair}
+                    </TableCell>
+                    <TableCell className="text-xs font-medium whitespace-nowrap px-8 min-w-[180px]">
+                      <div>open: {formatDate(trade.openDate)}</div>
+                      <div>close: {formatDate(trade.closeDate)}</div>
+                    </TableCell>
+                    <TableCell className="whitespace-nowrap px-8 min-w-[100px]">
+                      <span
+                        className={`inline-flex items-center justify-center rounded-md px-2 py-1 text-xs font-bold ${
+                          trade.result === "WIN"
+                            ? "bg-green-200 text-green-900"
+                            : trade.result === "LOSS"
+                            ? "bg-red-200 text-red-900"
+                            : "bg-slate-200 text-slate-900"
+                        }`}
+                      >
+                        {trade.result === "BREAKEVEN"
+                          ? "BE"
+                          : trade.result === "LOSS"
+                          ? "Loss"
+                          : "Win"}
+                      </span>
+                    </TableCell>
+                    <TableCell className="font-medium whitespace-nowrap px-8 min-w-[100px]">
+                      <span
+                        className={
+                          trade.pnl > 0
+                            ? "text-green-700"
+                            : trade.pnl < 0
+                            ? "text-red-700"
+                            : ""
+                        }
+                      >
+                        {trade.pnl}%
+                      </span>
+                    </TableCell>
+                    {journal.fields.map((field) => (
+                      <TableCell
+                        key={field.id}
+                        className="font-medium px-8 min-w-[180px] whitespace-nowrap"
+                      >
+                        {field.type === "MULTI_SELECT" ? (
+                          <div className="flex gap-1 items-center">
+                            {(() => {
+                              const fieldValue =
+                                typeof trade.fields === "string"
+                                  ? JSON.parse(trade.fields)[field.name]
+                                  : trade.fields[field.name];
+
+                              const values = Array.isArray(fieldValue)
+                                ? fieldValue
+                                : typeof fieldValue === "string"
+                                ? fieldValue.split(",")
+                                : [];
+
+                              return values.filter(Boolean).map((value, i) => (
+                                <Badge
+                                  key={i}
+                                  variant="secondary"
+                                  className="text-xs whitespace-nowrap"
+                                >
+                                  {value.trim()}
+                                </Badge>
+                              ));
+                            })()}
+                          </div>
+                        ) : typeof trade.fields === "string" ? (
+                          JSON.parse(trade.fields)[field.name]
+                        ) : (
+                          trade.fields[field.name]
+                        )}
+                      </TableCell>
+                    ))}
+                    <TableCell className="px-8 min-w-[250px]">
+                      {trade.notes}
+                    </TableCell>
+                    <TableCell>
+                      <TradeActions
+                        journalId={journal.id}
+                        trade={trade}
+                        journal={journal}
+                      />
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         </CardContent>
       </Card>
     </div>

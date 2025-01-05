@@ -88,7 +88,7 @@ const JournalsPage = async () => {
                         className={
                           trades.length > 0
                             ? winRate > 0
-                              ? "text-green-500"
+                              ? "text-green-700"
                               : winRate < 0
                               ? "text-red-700"
                               : ""
@@ -103,7 +103,7 @@ const JournalsPage = async () => {
                         className={
                           trades.length > 0
                             ? cummProfit > 0
-                              ? "text-green-500"
+                              ? "text-green-700"
                               : cummProfit < 0
                               ? "text-red-700"
                               : ""
@@ -137,10 +137,7 @@ const JournalsPage = async () => {
                             Open
                           </Link>
                         </Button>
-                        <JournalActions
-                          journalId={journal.id}
-                          journalName={journal.name}
-                        />
+                        <JournalActions journal={journal} />
                       </div>
                     </TableCell>
                   </TableRow>

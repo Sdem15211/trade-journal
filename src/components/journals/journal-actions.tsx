@@ -23,22 +23,20 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useState } from "react";
+import { createSlug } from "@/lib/utils";
+import type { Journal } from "@prisma/client";
 
 interface JournalActionsProps {
-  journalId: string;
-  journalName: string;
+  journal: Journal;
 }
 
-export function JournalActions({
-  journalId,
-  journalName,
-}: JournalActionsProps) {
+export function JournalActions({ journal }: JournalActionsProps) {
   const { toast } = useToast();
   const router = useRouter();
-  const [isOpen, setIsOpen] = useState(false);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
   const handleDelete = async () => {
-    const result = await deleteJournal(journalId);
+    const result = await deleteJournal(journal.id);
 
     if (result.error) {
       toast({
@@ -56,7 +54,7 @@ export function JournalActions({
   };
 
   return (
-    <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
+    <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -67,7 +65,11 @@ export function JournalActions({
         <DropdownMenuContent align="end">
           <DropdownMenuItem
             className="cursor-pointer"
-            onClick={() => router.push(`/dashboard/journals/${journalId}/edit`)}
+            onClick={() =>
+              router.push(
+                `/dashboard/journals/${createSlug(journal.name)}/edit`
+              )
+            }
           >
             <Pencil className="mr-2 h-4 w-4" />
             Modify
@@ -85,8 +87,8 @@ export function JournalActions({
         <AlertDialogHeader>
           <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
           <AlertDialogDescription>
-            This will permanently delete the journal &quot;{journalName}&quot;
-            and all its associated trades. This action cannot be undone.
+            This will permanently delete the journal &quot;{journal.name}
+            &quot; and all its associated trades. This action cannot be undone.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
