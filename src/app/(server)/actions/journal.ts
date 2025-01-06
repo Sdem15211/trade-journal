@@ -69,8 +69,11 @@ export async function createJournal(
       },
     });
 
-    revalidatePath("/dashboard/journals");
-    return { success: true, message: "Journal created successfully" };
+    return {
+      success: true,
+      message: "Journal created successfully",
+      data: validatedData.data,
+    };
   } catch (error) {
     if (
       error instanceof Error &&

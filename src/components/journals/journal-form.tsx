@@ -15,6 +15,7 @@ import { useActionState } from "react";
 import { CheckCircle2, PlusIcon } from "lucide-react";
 import { Alert, AlertDescription } from "../ui/alert";
 import { DefaultFieldDisplay } from "./default-field-display";
+import { createSlug } from "@/lib/utils";
 
 export interface ActionResponse {
   success: boolean;
@@ -22,6 +23,7 @@ export interface ActionResponse {
   errors?: {
     [K in keyof CreateJournalInput]?: string[];
   };
+  data?: CreateJournalInput;
 }
 
 const initialState: ActionResponse = {
@@ -52,7 +54,7 @@ export function JournalForm() {
         title: "Success",
         description: state.message || "Journal created successfully",
       });
-      router.push("/dashboard/journals");
+      router.push(`/dashboard/journals/${createSlug(state.data.name)}`);
     }
   }, [state, toast, router]);
 

@@ -49,7 +49,6 @@ export function JournalActions({ journal }: JournalActionsProps) {
         title: "Success",
         description: "Journal deleted successfully",
       });
-      router.refresh();
     }
   };
 
