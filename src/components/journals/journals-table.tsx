@@ -56,9 +56,14 @@ export async function JournalsTable() {
             const winningTrades = trades.filter(
               (trade) => trade.result === "WIN"
             );
+            const losingTrades = trades.filter(
+              (trade) => trade.result === "LOSS"
+            );
+            const totalTradesExcludingBreakeven =
+              winningTrades.length + losingTrades.length;
             const winRate =
-              trades.length > 0
-                ? (winningTrades.length / trades.length) * 100
+              totalTradesExcludingBreakeven > 0
+                ? (winningTrades.length / totalTradesExcludingBreakeven) * 100
                 : 0;
             const cummProfit = trades.reduce(
               (sum, trade) => sum + trade.pnl,

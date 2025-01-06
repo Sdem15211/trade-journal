@@ -27,6 +27,7 @@ import { createSlug } from "@/lib/utils";
 import { LogTradeDialog } from "@/components/journals/log-trade-dialog";
 import { Badge } from "@/components/ui/badge";
 import { TradeActions } from "@/components/journals/trade-actions";
+import { JournalActions } from "./journal-actions";
 
 interface JournalDetailProps {
   journal: Journal & {
@@ -67,9 +68,7 @@ export function JournalDetail({
           <Button variant="ghost" size="icon">
             <Bell className="h-5 w-5" />
           </Button>
-          <Button variant="ghost" size="icon">
-            <Settings2 className="h-5 w-5" />
-          </Button>
+          <JournalActions isDetail={true} journal={journal} />
         </div>
       </div>
 

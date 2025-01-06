@@ -1,6 +1,6 @@
 "use client";
 
-import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import { MoreHorizontal, Pencil, Settings2, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -28,9 +28,10 @@ import type { Journal } from "@prisma/client";
 
 interface JournalActionsProps {
   journal: Journal;
+  isDetail?: boolean;
 }
 
-export function JournalActions({ journal }: JournalActionsProps) {
+export function JournalActions({ journal, isDetail }: JournalActionsProps) {
   const { toast } = useToast();
   const router = useRouter();
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
@@ -49,6 +50,7 @@ export function JournalActions({ journal }: JournalActionsProps) {
         title: "Success",
         description: "Journal deleted successfully",
       });
+      router.push("/dashboard/journals");
     }
   };
 
@@ -57,7 +59,11 @@ export function JournalActions({ journal }: JournalActionsProps) {
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" size="icon" className="h-8 w-8">
-            <MoreHorizontal className="h-4 w-4" />
+            {!isDetail ? (
+              <MoreHorizontal className="h-4 w-4" />
+            ) : (
+              <Settings2 className="h-4 w-4" />
+            )}
             <span className="sr-only">Open menu</span>
           </Button>
         </DropdownMenuTrigger>

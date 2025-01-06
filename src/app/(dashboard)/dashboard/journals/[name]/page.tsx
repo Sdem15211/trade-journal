@@ -1,6 +1,5 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { JournalDetail } from "@/components/journals/journal-detail";
 import { Suspense } from "react";
 import { JournalDetailSkeleton } from "@/components/journals/journal-detail-skeleton";
 import { JournalContent } from "@/components/journals/journal-content";
