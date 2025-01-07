@@ -102,7 +102,7 @@ export async function createTrade(
       },
     });
 
-    revalidatePath(`/dashboard/journals/${journal.name}`);
+    revalidatePath("/dashboard/journals/[name]", "page");
     return { success: true, message: "Trade logged successfully" };
   } catch (error) {
     console.error("Trade creation error:", error);
@@ -137,7 +137,7 @@ export async function deleteTrade(tradeId: string) {
       },
     });
 
-    revalidatePath("/dashboard/journals/[name]");
+    revalidatePath("/dashboard/journals/[name]", "page");
     return { success: true };
   } catch (error) {
     return { error: "Failed to delete trade" };
@@ -224,7 +224,7 @@ export async function updateTrade(
       },
     });
 
-    revalidatePath("/dashboard/journals/[name]");
+    revalidatePath("/dashboard/journals/[name]", "page");
     return { success: true, message: "Trade updated successfully" };
   } catch (error) {
     console.error("Trade update error:", error);

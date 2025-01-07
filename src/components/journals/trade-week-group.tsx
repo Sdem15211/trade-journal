@@ -161,7 +161,7 @@ export function TradeWeekGroup({
                       {journal.fields.map((field) => (
                         <TableCell
                           key={field.id}
-                          className="font-medium px-8 min-w-[180px] max-w-[180px] whitespace-normal"
+                          className="font-medium px-8 min-w-[250px] whitespace-normal"
                         >
                           {field.type === "MULTI_SELECT" ? (
                             <div className="flex flex-wrap gap-1 items-center">

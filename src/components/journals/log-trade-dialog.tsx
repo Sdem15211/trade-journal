@@ -269,9 +269,8 @@ export function LogTradeDialog({ journal }: LogTradeDialogProps) {
             />
           </div>
 
-          {state?.message && (
-            <Alert variant={state.success ? "default" : "destructive"}>
-              {state.success && <CheckCircle2 className="h-4 w-4" />}
+          {state?.message && !state.success && (
+            <Alert variant="destructive">
               <AlertDescription>{state.message}</AlertDescription>
             </Alert>
           )}
