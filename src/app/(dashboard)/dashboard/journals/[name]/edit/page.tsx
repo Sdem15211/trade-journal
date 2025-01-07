@@ -41,7 +41,7 @@ export default async function EditJournalPage({
   const breadcrumbItems = [
     { label: "Dashboard", href: "/dashboard" },
     { label: "Journals", href: "/dashboard/journals" },
-    { label: journal.name, href: `/dashboard/journals/${params.name}` },
+    { label: journal.name, href: `/dashboard/journals/${name}` },
     { label: "Edit Journal" },
   ];
 

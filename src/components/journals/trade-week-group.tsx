@@ -155,6 +155,7 @@ export function TradeWeekGroup({
                               : ""
                           }
                         >
+                          {trade.pnl > 0 ? "+" : ""}
                           {trade.pnl}%
                         </span>
                       </TableCell>

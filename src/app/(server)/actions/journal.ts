@@ -200,8 +200,6 @@ export async function updateJournal(
       },
     });
 
-    revalidatePath(`/dashboard/journals/${createSlug(updatedJournal.name)}`);
-
     return {
       success: true,
       message: "Journal updated successfully",

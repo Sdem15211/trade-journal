@@ -64,6 +64,7 @@ export function ModifyJournalForm({ journal }: ModifyJournalFormProps) {
         description: state.message || "Journal updated successfully",
       });
       router.push(`/dashboard/journals/${createSlug(state.data.name)}`);
+      router.refresh();
     }
   }, [state, toast, router]);
 

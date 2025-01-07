@@ -128,7 +128,7 @@ export function JournalDetail({ journal, statistics }: JournalDetailProps) {
         </Card>
       </div>
 
-      <div className="flex justify-end items-center mt-16 mb-4">
+      <div className="flex justify-end items-center mt-12 mb-4">
         <LogTradeDialog journal={journal} />
       </div>
 
