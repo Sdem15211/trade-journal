@@ -17,17 +17,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Bell, Settings2 } from "lucide-react";
+import { Bell } from "lucide-react";
 import { formatDate } from "@/lib/utils";
-import Link from "next/link";
 import type { Journal, JournalField, Trade } from "@prisma/client";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { createSlug } from "@/lib/utils";
 import { LogTradeDialog } from "@/components/journals/log-trade-dialog";
 import { Badge } from "@/components/ui/badge";
 import { TradeActions } from "@/components/journals/trade-actions";
 import { JournalActions } from "./journal-actions";
+import { useState } from "react";
+import { JournalPLChart } from "./journal-pl-chart";
 
 interface JournalDetailProps {
   journal: Journal & {
@@ -50,6 +50,10 @@ export function JournalDetail({
   statistics,
   monthlyData,
 }: JournalDetailProps) {
+  const [chartPeriod, setChartPeriod] = useState<"monthly" | "weekly">(
+    "monthly"
+  );
+
   return (
     <div className="p-6 max-w-[1200px] mx-auto">
       <div className="flex items-center gap-4 mb-8">
@@ -73,7 +77,7 @@ export function JournalDetail({
       </div>
 
       <div className="grid md:grid-cols-[300px,1fr] gap-6">
-        <div className="space-y-4">
+        <div className="flex flex-col justify-between">
           <Card>
             <CardContent className="p-4">
               <div className="text-sm text-muted-foreground">Win Rate</div>
@@ -106,39 +110,27 @@ export function JournalDetail({
           <CardContent className="p-6">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-lg font-semibold">P&L</h2>
-              <Select defaultValue="monthly">
+              <Select
+                value={chartPeriod}
+                onValueChange={(value: "monthly" | "weekly") =>
+                  setChartPeriod(value)
+                }
+              >
                 <SelectTrigger className="w-32">
                   <SelectValue placeholder="Select period" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="monthly">Monthly</SelectItem>
                   <SelectItem value="weekly">Weekly</SelectItem>
-                  <SelectItem value="daily">Daily</SelectItem>
                 </SelectContent>
               </Select>
             </div>
-            <div className="h-[200px] flex items-end gap-2">
-              {monthlyData.map((data, index) => (
-                <div key={index} className="flex-1 flex flex-col items-center">
-                  <div
-                    className="w-full bg-gray-900 rounded-sm"
-                    style={{ height: `${Math.abs(data.value) * 10}%` }}
-                  />
-                  <div className="text-xs mt-2">{data.month}</div>
-                </div>
-              ))}
-            </div>
+            <JournalPLChart trades={journal.trades} period={chartPeriod} />
           </CardContent>
         </Card>
       </div>
 
-      <div className="flex justify-end gap-2 items-center mt-16 mb-4">
-        <Button variant="outline" asChild>
-          <Link href={`/dashboard/journals/${createSlug(journal.name)}/edit`}>
-            <Settings2 className="h-4 w-4 mr-2" />
-            Edit journal
-          </Link>
-        </Button>
+      <div className="flex justify-end items-center mt-16 mb-4">
         <LogTradeDialog journal={journal} />
       </div>
 

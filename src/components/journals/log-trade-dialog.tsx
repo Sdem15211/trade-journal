@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { CalendarIcon, CheckCircle2, X } from "lucide-react";
+import { CalendarIcon, CheckCircle2, Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -76,7 +76,9 @@ export function LogTradeDialog({ journal }: LogTradeDialogProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button>Log trade</Button>
+        <Button>
+          Log trade <Plus className="h-4 w-4 ml-1" />
+        </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
