@@ -28,6 +28,8 @@ import { TradeActions } from "@/components/journals/trade-actions";
 import { JournalActions } from "./journal-actions";
 import { useState } from "react";
 import { JournalPLChart } from "./journal-pl-chart";
+import { startOfWeek, endOfWeek, getISOWeek } from "date-fns";
+import { TradeWeekGroup } from "./trade-week-group";
 
 interface JournalDetailProps {
   journal: Journal & {
@@ -45,11 +47,7 @@ interface JournalDetailProps {
   }>;
 }
 
-export function JournalDetail({
-  journal,
-  statistics,
-  monthlyData,
-}: JournalDetailProps) {
+export function JournalDetail({ journal, statistics }: JournalDetailProps) {
   const [chartPeriod, setChartPeriod] = useState<"monthly" | "weekly">(
     "monthly"
   );
@@ -134,132 +132,46 @@ export function JournalDetail({
         <LogTradeDialog journal={journal} />
       </div>
 
-      <Card>
-        <CardContent className="p-4">
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="whitespace-nowrap px-8 min-w-[120px]">
-                    Pair
-                  </TableHead>
-                  <TableHead className="whitespace-nowrap px-8 min-w-[180px]">
-                    Date
-                  </TableHead>
-                  <TableHead className="whitespace-nowrap px-8 min-w-[100px]">
-                    Result
-                  </TableHead>
-                  <TableHead className="whitespace-nowrap px-8 min-w-[100px]">
-                    P&L
-                  </TableHead>
-                  {journal.fields.map((field) => (
-                    <TableHead
-                      key={field.id}
-                      className="whitespace-nowrap px-8 min-w-[180px]"
-                    >
-                      {field.name}
-                    </TableHead>
-                  ))}
-                  <TableHead className="whitespace-nowrap px-8 min-w-[250px]">
-                    Notes
-                  </TableHead>
-                  <TableHead className="w-[100px]"></TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {journal.trades.map((trade) => (
-                  <TableRow key={trade.id}>
-                    <TableCell className="font-bold whitespace-nowrap px-8 min-w-[120px]">
-                      {trade.pair}
-                    </TableCell>
-                    <TableCell className="text-xs font-medium whitespace-nowrap px-8 min-w-[180px]">
-                      <div>open: {formatDate(trade.openDate)}</div>
-                      <div>close: {formatDate(trade.closeDate)}</div>
-                    </TableCell>
-                    <TableCell className="whitespace-nowrap px-8 min-w-[100px]">
-                      <span
-                        className={`inline-flex items-center justify-center rounded-md px-2 py-1 text-xs font-bold ${
-                          trade.result === "WIN"
-                            ? "bg-green-200 text-green-900"
-                            : trade.result === "LOSS"
-                            ? "bg-red-200 text-red-900"
-                            : "bg-slate-200 text-slate-900"
-                        }`}
-                      >
-                        {trade.result === "BREAKEVEN"
-                          ? "BE"
-                          : trade.result === "LOSS"
-                          ? "Loss"
-                          : "Win"}
-                      </span>
-                    </TableCell>
-                    <TableCell className="font-medium whitespace-nowrap px-8 min-w-[100px]">
-                      <span
-                        className={
-                          trade.pnl > 0
-                            ? "text-green-700"
-                            : trade.pnl < 0
-                            ? "text-red-700"
-                            : ""
-                        }
-                      >
-                        {trade.pnl}%
-                      </span>
-                    </TableCell>
-                    {journal.fields.map((field) => (
-                      <TableCell
-                        key={field.id}
-                        className="font-medium px-8 min-w-[180px] whitespace-nowrap"
-                      >
-                        {field.type === "MULTI_SELECT" ? (
-                          <div className="flex gap-1 items-center">
-                            {(() => {
-                              const fieldValue =
-                                typeof trade.fields === "string"
-                                  ? JSON.parse(trade.fields)[field.name]
-                                  : trade.fields[field.name];
+      <div>
+        {(() => {
+          // Group trades by week
+          const tradesByWeek = new Map<string, Trade[]>();
 
-                              const values = Array.isArray(fieldValue)
-                                ? fieldValue
-                                : typeof fieldValue === "string"
-                                ? fieldValue.split(",")
-                                : [];
+          journal.trades.forEach((trade) => {
+            const weekStart = startOfWeek(trade.openDate, {
+              weekStartsOn: 1,
+            });
+            const weekKey = weekStart.toISOString();
 
-                              return values.filter(Boolean).map((value, i) => (
-                                <Badge
-                                  key={i}
-                                  variant="secondary"
-                                  className="text-xs whitespace-nowrap"
-                                >
-                                  {value.trim()}
-                                </Badge>
-                              ));
-                            })()}
-                          </div>
-                        ) : typeof trade.fields === "string" ? (
-                          JSON.parse(trade.fields)[field.name]
-                        ) : (
-                          trade.fields[field.name]
-                        )}
-                      </TableCell>
-                    ))}
-                    <TableCell className="px-8 min-w-[250px]">
-                      {trade.notes}
-                    </TableCell>
-                    <TableCell>
-                      <TradeActions
-                        journalId={journal.id}
-                        trade={trade}
-                        journal={journal}
-                      />
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        </CardContent>
-      </Card>
+            if (!tradesByWeek.has(weekKey)) {
+              tradesByWeek.set(weekKey, []);
+            }
+            tradesByWeek.get(weekKey)?.push(trade);
+          });
+
+          // Sort weeks by date (most recent first)
+          const sortedWeeks = Array.from(tradesByWeek.entries()).sort(
+            (a, b) => new Date(b[0]).getTime() - new Date(a[0]).getTime()
+          );
+
+          return sortedWeeks.map(([weekKey, trades]) => {
+            const weekStart = new Date(weekKey);
+            const weekEnd = endOfWeek(weekStart, { weekStartsOn: 1 });
+            const weekNumber = getISOWeek(weekStart);
+
+            return (
+              <TradeWeekGroup
+                key={weekKey}
+                weekNumber={weekNumber}
+                startDate={weekStart}
+                endDate={weekEnd}
+                trades={trades}
+                journal={journal}
+              />
+            );
+          });
+        })()}
+      </div>
     </div>
   );
 }
