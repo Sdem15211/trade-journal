@@ -19,8 +19,8 @@ import { formatDate } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { TradeActions } from "./trade-actions";
 import { format } from "date-fns";
-import { useState } from "react";
 import { Card } from "@/components/ui/card";
+import { useState } from "react";
 
 interface TradeWeekGroupProps {
   weekNumber: number;
