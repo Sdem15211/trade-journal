@@ -9,15 +9,15 @@ datasource db {
 }
 
 model User {
-  id            String    @id @default(cuid())
+  id            String     @id @default(cuid())
   name          String?
-  email         String    @unique
+  email         String     @unique
   emailVerified DateTime?
   image         String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
   accounts      Account[]
-  Journal       Journal[]
+  strategies    Strategy[]
   sessions      Session[]
 }
 
@@ -49,7 +49,7 @@ model Session {
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-model Journal {
+model Strategy {
   id          String         @id @default(cuid())
   name        String
   description String?
@@ -57,49 +57,86 @@ model Journal {
   createdAt   DateTime       @default(now())
   updatedAt   DateTime       @updatedAt
   user        User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  fields      JournalField[]
-  trades      Trade[]
+  fields      StrategyField[]
+  liveJournal LiveJournal?  // One-to-one relation with LiveJournal
+  backtests   Backtest[]    // One-to-many relation with Backtest
+  trades      Trade[]       // All trades across live and backtest
 
   @@unique([name, userId])
   @@index([userId])
 }
 
-model JournalField {
-  id        String    @id @default(cuid())
-  journalId String
-  name      String
-  type      FieldType
-  required  Boolean   @default(false)
-  order     Int
-  options   String[]
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  journal   Journal   @relation(fields: [journalId], references: [id], onDelete: Cascade)
+model StrategyField {
+  id         String     @id @default(cuid())
+  strategyId String
+  name       String
+  type       FieldType
+  required   Boolean    @default(false)
+  order      Int
+  options    String[]
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  strategy   Strategy   @relation(fields: [strategyId], references: [id], onDelete: Cascade)
 
-  @@index([journalId])
+  @@index([strategyId])
+}
+
+model LiveJournal {
+  id         String   @id @default(cuid())
+  strategyId String   @unique  // Makes this a one-to-one relation with Strategy
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  strategy   Strategy @relation(fields: [strategyId], references: [id], onDelete: Cascade)
+  trades     Trade[]  @relation("LiveTrades")
+}
+
+model Backtest {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  strategyId  String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  strategy    Strategy @relation(fields: [strategyId], references: [id], onDelete: Cascade)
+  trades      Trade[]  @relation("BacktestTrades")
+
+  @@index([strategyId])
 }
 
 model Trade {
-  id        String      @id @default(cuid())
-  journalId String
-  openDate  DateTime
-  closeDate DateTime
-  result    TradeResult
-  pnl       Float
-  notes     String?
-  fields    Json
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
-  pair      String
-  journal   Journal     @relation(fields: [journalId], references: [id], onDelete: Cascade)
+  id          String      @id @default(cuid())
+  strategyId  String
+  liveJournalId String?
+  backtestId  String?
+  pair        String
+  status      TradeStatus
+  openDate    DateTime
+  closeDate   DateTime?
+  result      TradeResult?
+  pnl         Float?
+  notes       String?
+  fields      Json
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  strategy    Strategy    @relation(fields: [strategyId], references: [id], onDelete: Cascade)
+  liveJournal LiveJournal? @relation("LiveTrades", fields: [liveJournalId], references: [id])
+  backtest    Backtest?   @relation("BacktestTrades", fields: [backtestId], references: [id])
 
-  @@index([journalId])
+  @@index([strategyId])
+  @@index([liveJournalId])
+  @@index([backtestId])
 }
 
 enum FieldType {
   TEXT
   SELECT
   MULTI_SELECT
+}
+
+enum TradeStatus {
+  ORDER_PLACED
+  OPEN
+  CLOSED
 }
 
 enum TradeResult {

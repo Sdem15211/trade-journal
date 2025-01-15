@@ -1,12 +1,4 @@
-import {
-  BadgeCheck,
-  BookOpen,
-  CreditCard,
-  Database,
-  Home,
-  LineChart,
-  Sparkles,
-} from "lucide-react";
+import { Database, Home, LineChart, Sparkles, Target } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -20,32 +12,15 @@ import {
   SidebarRail,
 } from "../ui/sidebar";
 import { SidebarUserProfile } from "./sidebar-user-profile";
-import { SidebarCollapsibleItem } from "./sidebar-collapsible-item";
 import { auth } from "@/lib/auth";
 import { SidebarActiveLink } from "./sidebar-active-link";
 import Link from "next/link";
 import { SidebarMenuButton } from "../ui/sidebar";
-import prisma from "@/lib/db";
-import { createSlug } from "@/lib/utils";
 
 export async function AppSidebar() {
   const session = await auth();
 
   if (!session?.user) return null;
-
-  // Fetch user's journals
-  const journals = await prisma.journal.findMany({
-    where: {
-      userId: session.user.id,
-    },
-    select: {
-      id: true,
-      name: true,
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
 
   return (
     <Sidebar collapsible="icon">
@@ -76,19 +51,12 @@ export async function AppSidebar() {
                 </SidebarActiveLink>
               </SidebarMenuItem>
 
-              <SidebarCollapsibleItem
-                icon={<BookOpen />}
-                label="Journals"
-                items={journals}
-                baseRoute="dashboard/journals"
-              />
-
-              <SidebarCollapsibleItem
-                icon={<Database />}
-                label="Backtesting"
-                items={journals}
-                baseRoute="dashboard/backtesting"
-              />
+              <SidebarMenuItem>
+                <SidebarActiveLink href="/dashboard/strategies">
+                  <Target />
+                  <span>Trading Strategies</span>
+                </SidebarActiveLink>
+              </SidebarMenuItem>
 
               <SidebarMenuItem>
                 <SidebarActiveLink href="/dashboard/ai-insights">

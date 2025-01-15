@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { CalendarIcon, CheckCircle2, Plus, X } from "lucide-react";
+import { CalendarIcon, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -31,23 +31,18 @@ import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { createTrade } from "@/app/(server)/actions/trade";
 import { useActionState } from "react";
-import type { Journal, JournalField } from "@prisma/client";
 import type { TradeActionResponse } from "@/app/(server)/actions/trade";
 import { Alert, AlertDescription } from "../ui/alert";
 import { MultiSelect } from "../ui/multi-select";
-
-interface LogTradeDialogProps {
-  journal: Journal & {
-    fields: JournalField[];
-  };
-}
+import { useStrategy } from "@/contexts/strategy-context";
 
 const initialState: TradeActionResponse = {
   success: false,
   message: "",
 };
 
-export function LogTradeDialog({ journal }: LogTradeDialogProps) {
+export function LogTradeDialog() {
+  const { strategy } = useStrategy();
   const [open, setOpen] = React.useState(false);
   const { toast } = useToast();
   const [state, formAction, isPending] = useActionState(
@@ -89,7 +84,12 @@ export function LogTradeDialog({ journal }: LogTradeDialogProps) {
         </DialogHeader>
 
         <form action={formAction} className="space-y-4">
-          <input type="hidden" name="journalId" value={journal.id} />
+          <input
+            type="hidden"
+            name="liveJournalId"
+            value={strategy.liveJournal.id}
+          />
+          <input type="hidden" name="strategyId" value={strategy.id} />
           <input
             type="hidden"
             name="openDate"
@@ -198,8 +198,34 @@ export function LogTradeDialog({ journal }: LogTradeDialogProps) {
                     </span>
                   </SelectItem>
                   <SelectItem value="BREAKEVEN">
-                    <span className="inline-flex items-center justify-center rounded-md px-2 py-1 text-xs font-bold text-slate-900 bg-slate-200">
-                      BE
+                    <span className="inline-flex items-center justify-center rounded-md px-2 py-1 text-xs font-bold text-gray-900 bg-gray-200">
+                      Breakeven
+                    </span>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="status">Status</Label>
+              <Select name="status" defaultValue="CLOSED" disabled={isPending}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ORDER_PLACED">
+                    <span className="inline-flex items-center justify-center rounded-md px-2 py-1 text-xs font-bold text-yellow-900 bg-yellow-200">
+                      Order Placed
+                    </span>
+                  </SelectItem>
+                  <SelectItem value="OPEN">
+                    <span className="inline-flex items-center justify-center rounded-md px-2 py-1 text-xs font-bold text-blue-900 bg-blue-200">
+                      Open
+                    </span>
+                  </SelectItem>
+                  <SelectItem value="CLOSED">
+                    <span className="inline-flex items-center justify-center rounded-md px-2 py-1 text-xs font-bold text-gray-900 bg-gray-200">
+                      Closed
                     </span>
                   </SelectItem>
                 </SelectContent>
@@ -225,8 +251,8 @@ export function LogTradeDialog({ journal }: LogTradeDialogProps) {
             </div>
           </div>
 
-          {/* Custom fields */}
-          {journal.fields.map((field) => (
+          {/* Custom fields from strategy */}
+          {strategy.fields.map((field) => (
             <div key={field.id} className="space-y-2">
               <Label htmlFor={`fields.${field.name}`}>{field.name}</Label>
               {field.type === "TEXT" ? (
@@ -234,9 +260,14 @@ export function LogTradeDialog({ journal }: LogTradeDialogProps) {
                   id={`fields.${field.name}`}
                   name={`fields.${field.name}`}
                   disabled={isPending}
+                  required={field.required}
                 />
               ) : field.type === "SELECT" ? (
-                <Select name={`fields.${field.name}`} disabled={isPending}>
+                <Select
+                  name={`fields.${field.name}`}
+                  disabled={isPending}
+                  required={field.required}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Select" />
                   </SelectTrigger>
@@ -253,6 +284,7 @@ export function LogTradeDialog({ journal }: LogTradeDialogProps) {
                   name={`fields.${field.name}`}
                   options={field.options ?? []}
                   disabled={isPending}
+                  required={field.required}
                 />
               ) : null}
             </div>

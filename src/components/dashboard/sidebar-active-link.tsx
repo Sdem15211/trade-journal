@@ -8,18 +8,28 @@ import { ReactNode } from "react";
 interface SidebarActiveLinkProps {
   href: string;
   children: ReactNode;
-  isCollapsible?: boolean;
   size?: "default" | "lg";
 }
 
 export function SidebarActiveLink({
   href,
   children,
-  isCollapsible,
   size,
 }: SidebarActiveLinkProps) {
   const pathname = usePathname();
-  const isActive = isCollapsible ? pathname.includes(href) : pathname === href;
+
+  // Exact match for dashboard homepage
+  if (href === "/dashboard") {
+    return (
+      <SidebarMenuButton asChild size={size} isActive={pathname === href}>
+        <Link href={href}>{children}</Link>
+      </SidebarMenuButton>
+    );
+  }
+
+  // For other routes, check if the current path starts with the href
+  // This prevents partial matches in the middle of the path
+  const isActive = pathname.startsWith(href);
 
   return (
     <SidebarMenuButton asChild size={size} isActive={isActive}>

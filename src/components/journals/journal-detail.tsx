@@ -1,15 +1,6 @@
 "use client";
 
-import { Card, CardContent } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Select,
   SelectContent,
@@ -17,63 +8,27 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Bell } from "lucide-react";
-import { formatDate } from "@/lib/utils";
-import type { Journal, JournalField, Trade } from "@prisma/client";
-import { Breadcrumbs } from "@/components/ui/breadcrumbs";
-import { SidebarTrigger } from "@/components/ui/sidebar";
+import type { LiveJournal, Trade } from "@prisma/client";
 import { LogTradeDialog } from "@/components/journals/log-trade-dialog";
-import { Badge } from "@/components/ui/badge";
-import { TradeActions } from "@/components/journals/trade-actions";
-import { JournalActions } from "./journal-actions";
 import { useState } from "react";
 import { JournalPLChart } from "./journal-pl-chart";
 import { startOfWeek, endOfWeek, getISOWeek } from "date-fns";
 import { TradeWeekGroup } from "./trade-week-group";
+import { useStrategy } from "@/contexts/strategy-context";
+import { BookOpen } from "lucide-react";
 
-interface JournalDetailProps {
-  journal: Journal & {
-    fields: JournalField[];
-    trades: Trade[];
-  };
-  statistics: {
-    winRate: number;
-    cummProfit: number;
-    avgReturn: number;
-  };
-  monthlyData: Array<{
-    month: string;
-    value: number;
-  }>;
-}
-
-export function JournalDetail({ journal, statistics }: JournalDetailProps) {
+export function JournalDetail() {
+  const { strategy, statistics, monthlyData } = useStrategy();
   const [chartPeriod, setChartPeriod] = useState<"monthly" | "weekly">(
     "monthly"
   );
 
+  if (!strategy.liveJournal) {
+    return null;
+  }
+
   return (
-    <div className="p-6 max-w-[1200px] mx-auto">
-      <div className="flex items-center gap-4 mb-8">
-        <SidebarTrigger />
-        <Breadcrumbs
-          items={[
-            { label: "Journals", href: "/dashboard/journals" },
-            { label: journal.name },
-          ]}
-        />
-      </div>
-
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">{journal.name}</h1>
-        <div className="flex gap-2">
-          <Button variant="ghost" size="icon">
-            <Bell className="h-5 w-5" />
-          </Button>
-          <JournalActions isDetail={true} journal={journal} />
-        </div>
-      </div>
-
+    <div>
       <div className="grid md:grid-cols-[300px,1fr] gap-6">
         <div className="flex flex-col justify-between">
           <Card>
@@ -123,55 +78,71 @@ export function JournalDetail({ journal, statistics }: JournalDetailProps) {
                 </SelectContent>
               </Select>
             </div>
-            <JournalPLChart trades={journal.trades} period={chartPeriod} />
+            <JournalPLChart
+              trades={strategy.liveJournal.trades}
+              period={chartPeriod}
+            />
           </CardContent>
         </Card>
       </div>
 
-      <div className="flex justify-end items-center mt-12 mb-4">
-        <LogTradeDialog journal={journal} />
+      <div className="flex justify-end mt-12 mb-4">
+        <LogTradeDialog />
       </div>
 
-      <div>
-        {(() => {
-          // Group trades by week
-          const tradesByWeek = new Map<string, Trade[]>();
+      {strategy.liveJournal.trades.length === 0 ? (
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <BookOpen className="h-12 w-12 text-muted-foreground mb-4" />
+              <h3 className="text-lg font-semibold mb-2">
+                No trades logged yet
+              </h3>
+              <p className="text-muted-foreground mb-6">
+                Start logging your trades to track your performance
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      ) : (
+        <div>
+          {(() => {
+            const tradesByWeek = new Map<string, Trade[]>();
 
-          journal.trades.forEach((trade) => {
-            const weekStart = startOfWeek(trade.openDate, {
-              weekStartsOn: 1,
+            strategy.liveJournal.trades.forEach((trade) => {
+              const weekStart = startOfWeek(trade.openDate, {
+                weekStartsOn: 1,
+              });
+              const weekKey = weekStart.toISOString();
+
+              if (!tradesByWeek.has(weekKey)) {
+                tradesByWeek.set(weekKey, []);
+              }
+              tradesByWeek.get(weekKey)?.push(trade);
             });
-            const weekKey = weekStart.toISOString();
 
-            if (!tradesByWeek.has(weekKey)) {
-              tradesByWeek.set(weekKey, []);
-            }
-            tradesByWeek.get(weekKey)?.push(trade);
-          });
-
-          // Sort weeks by date (most recent first)
-          const sortedWeeks = Array.from(tradesByWeek.entries()).sort(
-            (a, b) => new Date(b[0]).getTime() - new Date(a[0]).getTime()
-          );
-
-          return sortedWeeks.map(([weekKey, trades]) => {
-            const weekStart = new Date(weekKey);
-            const weekEnd = endOfWeek(weekStart, { weekStartsOn: 1 });
-            const weekNumber = getISOWeek(weekStart);
-
-            return (
-              <TradeWeekGroup
-                key={weekKey}
-                weekNumber={weekNumber}
-                startDate={weekStart}
-                endDate={weekEnd}
-                trades={trades}
-                journal={journal}
-              />
+            const sortedWeeks = Array.from(tradesByWeek.entries()).sort(
+              (a, b) => new Date(b[0]).getTime() - new Date(a[0]).getTime()
             );
-          });
-        })()}
-      </div>
+
+            return sortedWeeks.map(([weekKey, trades]) => {
+              const weekStart = new Date(weekKey);
+              const weekEnd = endOfWeek(weekStart, { weekStartsOn: 1 });
+              const weekNumber = getISOWeek(weekStart);
+
+              return (
+                <TradeWeekGroup
+                  key={weekKey}
+                  weekNumber={weekNumber}
+                  startDate={weekStart}
+                  endDate={weekEnd}
+                  strategy={strategy}
+                />
+              );
+            });
+          })()}
+        </div>
+      )}
     </div>
   );
 }

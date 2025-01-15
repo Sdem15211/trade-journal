@@ -30,14 +30,22 @@ import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { updateTrade } from "@/app/(server)/actions/trade";
 import { useActionState } from "react";
-import type { Journal, JournalField, Trade } from "@prisma/client";
+import type {
+  LiveJournal,
+  Strategy,
+  StrategyField,
+  Trade,
+} from "@prisma/client";
 import type { TradeActionResponse } from "@/app/(server)/actions/trade";
 import { Alert, AlertDescription } from "../ui/alert";
 import { MultiSelect } from "../ui/multi-select";
 
 interface ModifyTradeDialogProps {
-  journal: Journal & {
-    fields: JournalField[];
+  strategy: Strategy & {
+    fields: StrategyField[];
+    liveJournal?: LiveJournal & {
+      trades: Trade[];
+    };
   };
   trade: Trade;
   open: boolean;
@@ -50,7 +58,7 @@ const initialState: TradeActionResponse = {
 };
 
 export function ModifyTradeDialog({
-  journal,
+  strategy,
   trade,
   open,
   onOpenChange,
@@ -96,7 +104,12 @@ export function ModifyTradeDialog({
 
         <form action={formAction} className="space-y-4">
           <input type="hidden" name="tradeId" value={trade.id} />
-          <input type="hidden" name="journalId" value={journal.id} />
+          <input
+            type="hidden"
+            name="liveJournalId"
+            value={strategy.liveJournal.id}
+          />
+          <input type="hidden" name="strategyId" value={strategy.id} />
           <input
             type="hidden"
             name="openDate"
@@ -218,6 +231,36 @@ export function ModifyTradeDialog({
             </div>
 
             <div className="space-y-2">
+              <Label htmlFor="status">Status</Label>
+              <Select
+                name="status"
+                defaultValue={trade.status}
+                disabled={isPending}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ORDER_PLACED">
+                    <span className="inline-flex items-center justify-center rounded-md px-2 py-1 text-xs font-bold text-yellow-900 bg-yellow-200">
+                      Order Placed
+                    </span>
+                  </SelectItem>
+                  <SelectItem value="OPEN">
+                    <span className="inline-flex items-center justify-center rounded-md px-2 py-1 text-xs font-bold text-blue-900 bg-blue-200">
+                      Open
+                    </span>
+                  </SelectItem>
+                  <SelectItem value="CLOSED">
+                    <span className="inline-flex items-center justify-center rounded-md px-2 py-1 text-xs font-bold text-gray-900 bg-gray-200">
+                      Closed
+                    </span>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
               <Label htmlFor="pnl">P&L</Label>
               <div className="relative">
                 <Input
@@ -236,8 +279,7 @@ export function ModifyTradeDialog({
             </div>
           </div>
 
-          {/* Custom fields */}
-          {journal.fields.map((field) => (
+          {strategy.fields.map((field) => (
             <div key={field.id} className="space-y-2">
               <Label htmlFor={`fields.${field.name}`}>{field.name}</Label>
               {field.type === "TEXT" ? (

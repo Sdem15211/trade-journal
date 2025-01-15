@@ -1,6 +1,6 @@
 "use client";
 
-import { Trade, Journal, JournalField } from "@prisma/client";
+import { Trade, LiveJournal, Strategy, StrategyField } from "@prisma/client";
 import {
   Collapsible,
   CollapsibleContent,
@@ -26,9 +26,11 @@ interface TradeWeekGroupProps {
   weekNumber: number;
   startDate: Date;
   endDate: Date;
-  trades: Trade[];
-  journal: Journal & {
-    fields: JournalField[];
+  strategy: Strategy & {
+    fields: StrategyField[];
+    liveJournal?: LiveJournal & {
+      trades: Trade[];
+    };
   };
 }
 
@@ -36,11 +38,10 @@ export function TradeWeekGroup({
   weekNumber,
   startDate,
   endDate,
-  trades,
-  journal,
+  strategy,
 }: TradeWeekGroupProps) {
   const [isOpen, setIsOpen] = useState(true);
-
+  const trades = strategy.liveJournal.trades;
   const totalPnL = trades.reduce((sum, trade) => sum + trade.pnl, 0);
   const formattedDateRange = `${format(startDate, "dd/MM/yy")}-${format(
     endDate,
@@ -48,7 +49,7 @@ export function TradeWeekGroup({
   )}`;
 
   return (
-    <Card className="mb-4">
+    <Card className="mb-4 max-w-full">
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
         <CollapsibleTrigger className="w-full">
           <div className="flex items-center justify-between p-4 hover:bg-muted/50 transition-colors duration-200 rounded-[var(--radius)]">
@@ -87,48 +88,53 @@ export function TradeWeekGroup({
         </CollapsibleTrigger>
 
         <CollapsibleContent>
-          <div className="pt-0">
+          <div className="pt-0 pb-2">
             {trades.length > 0 ? (
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="whitespace-nowrap px-8 min-w-[120px]">
-                      Pair
-                    </TableHead>
-                    <TableHead className="whitespace-nowrap px-8 min-w-[180px]">
-                      Date
-                    </TableHead>
-                    <TableHead className="whitespace-nowrap px-8 min-w-[100px]">
-                      Result
-                    </TableHead>
-                    <TableHead className="whitespace-nowrap px-8 min-w-[100px]">
-                      P&L
-                    </TableHead>
-                    {journal.fields.map((field) => (
-                      <TableHead
-                        key={field.id}
-                        className="whitespace-nowrap px-8 min-w-[180px]"
-                      >
+                    <TableHead className="px-8">Pair</TableHead>
+                    <TableHead className="px-8">Status</TableHead>
+                    <TableHead className="px-8">Date</TableHead>
+                    <TableHead className="px-8">Result</TableHead>
+                    <TableHead className="px-8">P&L</TableHead>
+                    {strategy.fields.map((field) => (
+                      <TableHead key={field.id} className="px-8">
                         {field.name}
                       </TableHead>
                     ))}
-                    <TableHead className="whitespace-nowrap px-8 min-w-[250px]">
-                      Notes
-                    </TableHead>
+                    <TableHead className="px-8">Notes</TableHead>
                     <TableHead className="w-[100px]"></TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {trades.map((trade) => (
                     <TableRow key={trade.id}>
-                      <TableCell className="font-bold whitespace-nowrap px-8 min-w-[120px]">
+                      <TableCell className="font-bold px-8">
                         {trade.pair}
                       </TableCell>
-                      <TableCell className="text-xs font-medium whitespace-nowrap px-8 min-w-[180px]">
+                      <TableCell className="text-xs font-medium px-8">
+                        <span
+                          className={`inline-flex items-center justify-center rounded-md px-2 py-1 text-xs font-bold ${
+                            trade.status === "OPEN"
+                              ? "bg-green-200 text-green-900"
+                              : trade.status === "ORDER_PLACED"
+                              ? "bg-yellow-200 text-yellow-900"
+                              : "bg-red-200 text-red-900"
+                          }`}
+                        >
+                          {trade.status === "ORDER_PLACED"
+                            ? "Order Placed"
+                            : trade.status === "OPEN"
+                            ? "Open"
+                            : "Closed"}
+                        </span>
+                      </TableCell>
+                      <TableCell className="text-xs font-medium px-8">
                         <div>open: {formatDate(trade.openDate)}</div>
                         <div>close: {formatDate(trade.closeDate)}</div>
                       </TableCell>
-                      <TableCell className="whitespace-nowrap px-8 min-w-[100px]">
+                      <TableCell className="px-8">
                         <span
                           className={`inline-flex items-center justify-center rounded-md px-2 py-1 text-xs font-bold ${
                             trade.result === "WIN"
@@ -145,7 +151,7 @@ export function TradeWeekGroup({
                             : "Win"}
                         </span>
                       </TableCell>
-                      <TableCell className="font-medium whitespace-nowrap px-8 min-w-[100px]">
+                      <TableCell className="font-medium px-8">
                         <span
                           className={
                             trade.pnl > 0
@@ -159,13 +165,13 @@ export function TradeWeekGroup({
                           {trade.pnl}%
                         </span>
                       </TableCell>
-                      {journal.fields.map((field) => (
+                      {strategy.fields.map((field) => (
                         <TableCell
                           key={field.id}
-                          className="font-medium px-8 min-w-[250px] whitespace-normal"
+                          className="font-medium px-8 whitespace-nowrap"
                         >
                           {field.type === "MULTI_SELECT" ? (
-                            <div className="flex flex-wrap gap-1 items-center">
+                            <div className="flex gap-1 items-center">
                               {(() => {
                                 const fieldValue =
                                   typeof trade.fields === "string"
@@ -184,7 +190,7 @@ export function TradeWeekGroup({
                                     <Badge
                                       key={i}
                                       variant="secondary"
-                                      className="text-xs whitespace-nowrap"
+                                      className="text-xs"
                                     >
                                       {value.trim()}
                                     </Badge>
@@ -202,11 +208,7 @@ export function TradeWeekGroup({
                         {trade.notes}
                       </TableCell>
                       <TableCell>
-                        <TradeActions
-                          journalId={journal.id}
-                          trade={trade}
-                          journal={journal}
-                        />
+                        <TradeActions trade={trade} strategy={strategy} />
                       </TableCell>
                     </TableRow>
                   ))}

@@ -24,17 +24,24 @@ import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { deleteTrade } from "@/app/(server)/actions/trade";
 import { ModifyTradeDialog } from "./modify-trade-dialog";
-import type { Journal, JournalField, Trade } from "@prisma/client";
+import type {
+  LiveJournal,
+  Strategy,
+  StrategyField,
+  Trade,
+} from "@prisma/client";
 
 interface TradeActionsProps {
-  journalId: string;
   trade: Trade;
-  journal: Journal & {
-    fields: JournalField[];
+  strategy: Strategy & {
+    fields: StrategyField[];
+    liveJournal?: LiveJournal & {
+      trades: Trade[];
+    };
   };
 }
 
-export function TradeActions({ trade, journal }: TradeActionsProps) {
+export function TradeActions({ trade, strategy }: TradeActionsProps) {
   const { toast } = useToast();
   const router = useRouter();
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
@@ -106,7 +113,7 @@ export function TradeActions({ trade, journal }: TradeActionsProps) {
       </AlertDialog>
 
       <ModifyTradeDialog
-        journal={journal}
+        strategy={strategy}
         trade={trade}
         open={isModifyOpen}
         onOpenChange={setIsModifyOpen}

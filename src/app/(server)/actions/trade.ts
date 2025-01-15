@@ -6,12 +6,14 @@ import { z } from "zod";
 import { revalidatePath } from "next/cache";
 
 const TradeSchema = z.object({
-  journalId: z.string(),
+  liveJournalId: z.string(),
+  strategyId: z.string(),
   pair: z.string().min(1, "Pair is required"),
   openDate: z.date(),
   closeDate: z.date(),
   result: z.enum(["WIN", "LOSS", "BREAKEVEN"]),
   pnl: z.number(),
+  status: z.enum(["ORDER_PLACED", "OPEN", "CLOSED"]),
   notes: z.string().optional(),
   fields: z.record(z.union([z.string(), z.array(z.string())])),
 });
@@ -56,7 +58,9 @@ export async function createTrade(
 
     // Parse form data
     const input = {
-      journalId: formData.get("journalId") as string,
+      liveJournalId: formData.get("liveJournalId") as string,
+      strategyId: formData.get("strategyId") as string,
+      status: formData.get("status") as "ORDER_PLACED" | "OPEN" | "CLOSED",
       pair: formData.get("pair") as string,
       openDate: new Date(formData.get("openDate") as string),
       closeDate: new Date(formData.get("closeDate") as string),
@@ -77,21 +81,22 @@ export async function createTrade(
       };
     }
 
-    // Verify journal belongs to user
-    const journal = await prisma.journal.findFirst({
+    // Verify strategy belongs to user
+    const strategy = await prisma.strategy.findFirst({
       where: {
-        id: input.journalId,
+        id: input.strategyId,
         userId: session.user.id,
       },
     });
 
-    if (!journal) {
-      return { success: false, message: "Journal not found" };
+    if (!strategy) {
+      return { success: false, message: "Strategy not found" };
     }
 
     await prisma.trade.create({
       data: {
-        journalId: validatedData.data.journalId,
+        liveJournalId: validatedData.data.liveJournalId,
+        status: validatedData.data.status,
         pair: validatedData.data.pair,
         openDate: validatedData.data.openDate,
         closeDate: validatedData.data.closeDate,
@@ -99,10 +104,11 @@ export async function createTrade(
         pnl: validatedData.data.pnl,
         notes: validatedData.data.notes,
         fields: validatedData.data.fields,
+        strategyId: validatedData.data.strategyId,
       },
     });
 
-    revalidatePath("/dashboard/journals/[name]", "page");
+    revalidatePath("/dashboard/strategies/[name]", "page");
     return { success: true, message: "Trade logged successfully" };
   } catch (error) {
     console.error("Trade creation error:", error);
@@ -121,8 +127,10 @@ export async function deleteTrade(tradeId: string) {
     const trade = await prisma.trade.findFirst({
       where: {
         id: tradeId,
-        journal: {
-          userId: session.user.id,
+        liveJournal: {
+          strategy: {
+            userId: session.user.id,
+          },
         },
       },
     });
@@ -137,7 +145,7 @@ export async function deleteTrade(tradeId: string) {
       },
     });
 
-    revalidatePath("/dashboard/journals/[name]", "page");
+    revalidatePath("/dashboard/strategies/[name]", "page");
     return { success: true };
   } catch (error) {
     return { error: "Failed to delete trade" };
@@ -176,7 +184,9 @@ export async function updateTrade(
 
     // Parse form data
     const input = {
-      journalId: formData.get("journalId") as string,
+      liveJournalId: formData.get("liveJournalId") as string,
+      strategyId: formData.get("strategyId") as string,
+      status: formData.get("status") as "ORDER_PLACED" | "OPEN" | "CLOSED",
       pair: formData.get("pair") as string,
       openDate: new Date(formData.get("openDate") as string),
       closeDate: new Date(formData.get("closeDate") as string),
@@ -201,8 +211,10 @@ export async function updateTrade(
     const trade = await prisma.trade.findFirst({
       where: {
         id: tradeId,
-        journal: {
-          userId: session.user.id,
+        liveJournal: {
+          strategy: {
+            userId: session.user.id,
+          },
         },
       },
     });
@@ -214,6 +226,8 @@ export async function updateTrade(
     await prisma.trade.update({
       where: { id: tradeId },
       data: {
+        liveJournalId: validatedData.data.liveJournalId,
+        status: validatedData.data.status,
         pair: validatedData.data.pair,
         openDate: validatedData.data.openDate,
         closeDate: validatedData.data.closeDate,
@@ -221,10 +235,11 @@ export async function updateTrade(
         pnl: validatedData.data.pnl,
         notes: validatedData.data.notes,
         fields: validatedData.data.fields,
+        strategyId: validatedData.data.strategyId,
       },
     });
 
-    revalidatePath("/dashboard/journals/[name]", "page");
+    revalidatePath("/dashboard/strategies/[name]", "page");
     return { success: true, message: "Trade updated successfully" };
   } catch (error) {
     console.error("Trade update error:", error);

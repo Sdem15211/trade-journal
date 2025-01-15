@@ -17,6 +17,7 @@ interface MultiSelectProps {
   name: string;
   disabled?: boolean;
   defaultValue?: string[];
+  required?: boolean;
 }
 
 export function MultiSelect({
@@ -24,6 +25,7 @@ export function MultiSelect({
   name,
   disabled,
   defaultValue = [],
+  required = false,
 }: MultiSelectProps) {
   const [selectedOptions, setSelectedOptions] =
     useState<string[]>(defaultValue);

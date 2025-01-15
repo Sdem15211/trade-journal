@@ -2,14 +2,7 @@ You are an expert in TypeScript, Node.js, Next.js App Router, React, Shadcn UI, 
 
 # app description
 
-this project is an online trading journal web app built with next.js (app router), designed for traders to log, analyze, and optimize their trades. key features include:
-
-- logging trades in custom-made journals with configurable fields tailored to specific strategies or commodities.
-- analyzing trade performance through detailed statistics and insights.
-- managing multiple journals for different trading approaches.
-- a home dashboard providing quick access to key insights, stats, and navigation.
-- a backtesting module to simulate trading strategies, record trades, and evaluate outcomes.
-- paid ai-driven insights for pattern recognition and advanced trade analysis.
+this app is designed as a comprehensive journaling and analytics tool for traders, empowering them to track and optimize their trading performance. the core idea is to provide a highly customizable platform tailored to each trader’s unique strategy, allowing them to seamlessly log trades, analyze results, and gain valuable insights into their trading habits.
 
 the app uses a supabase postgres database for storage and authjs v5 (next-auth) for authentication. shadcn ui, radix ui, and tailwindcss ensure a cohesive and responsive user interface.
 

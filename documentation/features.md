@@ -10,6 +10,7 @@ The trade journal app is your personal ai-powered trading assistant, built to he
    - track trade status through its lifecycle: open, win, loss, or break-even.
 3. Backtesting
    - log backtest trades with the same flow as live journaling to evaluate strategies in various market conditions.
+   - can be split up into different backtest "sessions" to test out approaches or ideas for that strategy.
    - provides ai-driven feedback for backtested setups to refine strategy effectiveness.
    - the more trades logged, the smarter and more relevant the ai insights become.
 4. performance analytics
