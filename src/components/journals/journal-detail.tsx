@@ -1,6 +1,7 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { LogTradeDialog } from "@/components/journals/log-trade-dialog";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Select,
   SelectContent,
@@ -8,14 +9,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { LiveJournal, Trade } from "@prisma/client";
-import { LogTradeDialog } from "@/components/journals/log-trade-dialog";
+import { useStrategy } from "@/contexts/strategy-context";
+import type { Trade } from "@prisma/client";
+import { endOfWeek, getISOWeek, startOfWeek } from "date-fns";
+import { BookOpen } from "lucide-react";
 import { useState } from "react";
 import { JournalPLChart } from "./journal-pl-chart";
-import { startOfWeek, endOfWeek, getISOWeek } from "date-fns";
 import { TradeWeekGroup } from "./trade-week-group";
-import { useStrategy } from "@/contexts/strategy-context";
-import { BookOpen } from "lucide-react";
 
 export function JournalDetail() {
   const { strategy, statistics, monthlyData } = useStrategy();

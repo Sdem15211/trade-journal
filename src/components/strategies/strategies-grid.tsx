@@ -1,4 +1,3 @@
-import { Strategy } from "@prisma/client";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 import { createSlug } from "@/lib/utils";

@@ -41,7 +41,7 @@ export function TradeWeekGroup({
   strategy,
 }: TradeWeekGroupProps) {
   const [isOpen, setIsOpen] = useState(true);
-  const trades = strategy.liveJournal.trades;
+  const trades = strategy.liveJournal?.trades || [];
   const totalPnL = trades.reduce((sum, trade) => sum + trade.pnl, 0);
   const formattedDateRange = `${format(startDate, "dd/MM/yy")}-${format(
     endDate,
@@ -87,33 +87,48 @@ export function TradeWeekGroup({
           </div>
         </CollapsibleTrigger>
 
-        <CollapsibleContent>
-          <div className="pt-0 pb-2">
+        <CollapsibleContent className="overflow-x-auto">
+          <div className="pt-0 pb-2 overflow-x-auto">
             {trades.length > 0 ? (
-              <Table>
+              <Table className="min-w-max">
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="px-8">Pair</TableHead>
-                    <TableHead className="px-8">Status</TableHead>
-                    <TableHead className="px-8">Date</TableHead>
-                    <TableHead className="px-8">Result</TableHead>
-                    <TableHead className="px-8">P&L</TableHead>
+                    <TableHead className="px-8 whitespace-nowrap min-w-[100px]">
+                      Pair
+                    </TableHead>
+                    <TableHead className="px-8 whitespace-nowrap min-w-[100px]">
+                      Status
+                    </TableHead>
+                    <TableHead className="px-8 whitespace-nowrap min-w-[100px]">
+                      Date
+                    </TableHead>
+                    <TableHead className="px-8 whitespace-nowrap min-w-[100px]  ">
+                      Result
+                    </TableHead>
+                    <TableHead className="px-8 whitespace-nowrap min-w-[100px]">
+                      P&L
+                    </TableHead>
                     {strategy.fields.map((field) => (
-                      <TableHead key={field.id} className="px-8">
+                      <TableHead
+                        key={field.id}
+                        className="px-8 whitespace-nowrap min-w-[180px]"
+                      >
                         {field.name}
                       </TableHead>
                     ))}
-                    <TableHead className="px-8">Notes</TableHead>
+                    <TableHead className="px-8 whitespace-nowrap min-w-[250px]">
+                      Notes
+                    </TableHead>
                     <TableHead className="w-[100px]"></TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {trades.map((trade) => (
                     <TableRow key={trade.id}>
-                      <TableCell className="font-bold px-8">
+                      <TableCell className="font-bold px-8 whitespace-nowrap">
                         {trade.pair}
                       </TableCell>
-                      <TableCell className="text-xs font-medium px-8">
+                      <TableCell className="text-xs font-medium px-8 whitespace-nowrap">
                         <span
                           className={`inline-flex items-center justify-center rounded-md px-2 py-1 text-xs font-bold ${
                             trade.status === "OPEN"
@@ -130,11 +145,11 @@ export function TradeWeekGroup({
                             : "Closed"}
                         </span>
                       </TableCell>
-                      <TableCell className="text-xs font-medium px-8">
+                      <TableCell className="text-xs font-medium px-8 whitespace-nowrap">
                         <div>open: {formatDate(trade.openDate)}</div>
                         <div>close: {formatDate(trade.closeDate)}</div>
                       </TableCell>
-                      <TableCell className="px-8">
+                      <TableCell className="px-8 whitespace-nowrap">
                         <span
                           className={`inline-flex items-center justify-center rounded-md px-2 py-1 text-xs font-bold ${
                             trade.result === "WIN"
@@ -151,7 +166,7 @@ export function TradeWeekGroup({
                             : "Win"}
                         </span>
                       </TableCell>
-                      <TableCell className="font-medium px-8">
+                      <TableCell className="font-medium px-8 whitespace-nowrap">
                         <span
                           className={
                             trade.pnl > 0
@@ -204,7 +219,7 @@ export function TradeWeekGroup({
                           )}
                         </TableCell>
                       ))}
-                      <TableCell className="px-8 min-w-[250px]">
+                      <TableCell className="px-8 min-w-[250px] whitespace-nowrap">
                         {trade.notes}
                       </TableCell>
                       <TableCell>

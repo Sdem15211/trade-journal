@@ -1,12 +1,12 @@
+import { StrategiesGrid } from "@/components/strategies/strategies-grid";
+import { StrategiesGridSkeleton } from "@/components/strategies/strategies-grid-skeleton";
 import { Button } from "@/components/ui/button";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import Link from "next/link";
 import { auth } from "@/lib/auth";
-import { redirect } from "next/navigation";
-import { StrategiesGrid } from "@/components/strategies/strategies-grid";
 import { PlusIcon } from "lucide-react";
+import Link from "next/link";
+import { redirect } from "next/navigation";
 import { Suspense } from "react";
-import { StrategiesGridSkeleton } from "@/components/strategies/strategies-grid-skeleton";
 
 export default async function StrategiesPage() {
   const session = await auth();

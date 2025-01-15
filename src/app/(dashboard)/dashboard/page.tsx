@@ -1,7 +1,7 @@
-import { auth } from "@/lib/auth";
-import { redirect } from "next/navigation";
 import LogoutButton from "@/components/auth/logout-button";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { auth } from "@/lib/auth";
+import { redirect } from "next/navigation";
 
 export default async function Dashboard() {
   const session = await auth();

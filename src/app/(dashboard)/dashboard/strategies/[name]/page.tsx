@@ -1,14 +1,14 @@
-import { auth } from "@/lib/auth";
-import { redirect, notFound } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { BookOpen, LineChart } from "lucide-react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { JournalDetail } from "@/components/journals/journal-detail";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { StrategyProvider } from "@/contexts/strategy-context";
+import { auth } from "@/lib/auth";
 import prisma from "@/lib/db";
 import { createSlug } from "@/lib/utils";
-import { JournalDetail } from "@/components/journals/journal-detail";
-import { StrategyProvider } from "@/contexts/strategy-context";
+import { LineChart } from "lucide-react";
+import { notFound, redirect } from "next/navigation";
 
 export default async function StrategyPage({
   params,

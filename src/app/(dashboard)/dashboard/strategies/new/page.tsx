@@ -1,8 +1,8 @@
-import { auth } from "@/lib/auth";
-import { redirect } from "next/navigation";
 import { StrategyForm } from "@/components/strategies/strategy-form";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { auth } from "@/lib/auth";
+import { redirect } from "next/navigation";
 
 export default async function NewStrategyPage() {
   const session = await auth();
